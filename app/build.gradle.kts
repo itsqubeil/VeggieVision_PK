@@ -60,4 +60,6 @@ dependencies {
     implementation (libs.tensorflow.lite.gpu)  // Add this line
     implementation (libs.tensorflow.lite.support)
     implementation (libs.text.recognition)
+
+    implementation (libs.mpandroidchart)
 }
