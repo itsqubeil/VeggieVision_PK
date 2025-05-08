@@ -37,28 +37,23 @@ class NLPActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(binding.root)
 
-        // Set up RecyclerView
         historyAdapter = NLPHistoryAdapter(queryHistory)
         binding.rvHistory.layoutManager = LinearLayoutManager(this)
         binding.rvHistory.adapter = historyAdapter
 
-        // Button import Excel
         binding.btnImportExcel.setOnClickListener {
             checkPermissionsAndOpenFilePicker()
         }
 
-        // Button Ask
         binding.btnAsk.setOnClickListener {
             val query = binding.etQuery.text.toString().trim()
             if (query.isNotEmpty()) {
                 val response = nlpProcessor.processQuery(query)
                 binding.tvResponse.text = response
 
-                // Tambahkan ke history
                 queryHistory.add(0, Pair(query, response))
                 historyAdapter.notifyItemInserted(0)
 
-                // Kosongkan input
                 binding.etQuery.text.clear()
             }
         }
@@ -66,14 +61,12 @@ class NLPActivity : AppCompatActivity() {
 
     private fun checkPermissionsAndOpenFilePicker() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Untuk Android 13 (API 33) dan yang lebih baru
             openFilePicker()
         } else if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_EXTERNAL_STORAGE
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // Minta izin jika belum diberikan
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
@@ -87,12 +80,10 @@ class NLPActivity : AppCompatActivity() {
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            // Gunakan setType (bukan type =) dan tentukan MIME types yang didukung dengan benar
             setType("*/*")
-            // Tambahkan array MIME types yang diterima
             putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
-                "application/vnd.ms-excel",                                          // .xls
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"  // .xlsx
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             ))
         }
         startActivityForResult(intent, REQUEST_CODE_PICK_EXCEL)
@@ -117,7 +108,6 @@ class NLPActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_PICK_EXCEL && resultCode == RESULT_OK) {
             data?.data?.let { uri ->
-                // Ambil izin persisten untuk URI yang dipilih
                 val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 contentResolver.takePersistableUriPermission(uri, takeFlags)
                 importExcelFile(uri)
@@ -131,11 +121,8 @@ class NLPActivity : AppCompatActivity() {
             inputStream?.use { stream ->
                 val workbook = WorkbookFactory.create(stream)
                 val sheet = workbook.getSheetAt(0)
-
-                // Kosongkan data lama
                 dataManager.clearData()
 
-                // Lewati baris header jika ada
                 var skipFirstRow = true
                 for (row in sheet) {
                     if (skipFirstRow) {

@@ -231,11 +231,9 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
-        // Add timestamp to filename to avoid duplicates
         val filename = "captured_image_${System.currentTimeMillis()}.png"
         val file = File(cacheDir, filename)
 
-        // Use PNG with 100% quality as requested
         FileOutputStream(file).use { outputStream ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
             outputStream.flush()
@@ -246,7 +244,6 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
 
     private fun createJsonResult(): String {
         try {
-            // Create data classes for Gson serialization
             data class Detection(
                 val `class`: String,
                 val confidence: Float,
@@ -262,7 +259,6 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
                 val timestamp: Long
             )
 
-            // Create detections list
             val detectionsList = detectedBoundingBoxes.map { box ->
                 Detection(
                     `class` = box.clsName,
@@ -274,14 +270,12 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
                 )
             }
 
-            // Create result object
             val resultData = ResultData(
                 detections = detectionsList,
                 recognizedText = recognizedText,
                 timestamp = System.currentTimeMillis()
             )
 
-            // Use Gson to convert to JSON
             val gson = GsonBuilder().setPrettyPrinting().create()
             return gson.toJson(resultData)
 
@@ -304,7 +298,6 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
                 confidenceValues[i] = box.cnf
             }
 
-            // Create raw JSON result
             rawJsonResult = createJsonResult()
 
             val intent = Intent(this, ResultActivity::class.java).apply {

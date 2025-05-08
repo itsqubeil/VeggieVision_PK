@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id ("kotlin-kapt")
 }
 
 android {
@@ -54,7 +55,10 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation (libs.poi)
-    implementation ("org.apache.poi:poi-ooxml:5.2.3")
+    implementation (libs.poi.ooxml)
+    implementation (libs.androidx.room.runtime)
+    implementation (libs.androidx.room.ktx)
+    kapt (libs.androidx.room.compiler)
     implementation(libs.tensorflow.lite.metadata)
     implementation (libs.tensorflow.lite.task.vision)
     implementation (libs.tensorflow.lite)

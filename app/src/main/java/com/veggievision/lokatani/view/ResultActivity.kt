@@ -1,21 +1,23 @@
 package com.veggievision.lokatani.view
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonParser
+import androidx.lifecycle.lifecycleScope
+import com.veggievision.lokatani.data.VeggieDatabase
+import com.veggievision.lokatani.data.VeggieEntity
 import com.veggievision.lokatani.databinding.ActivityResultBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ResultActivity : AppCompatActivity() {
 
@@ -23,12 +25,7 @@ class ResultActivity : AppCompatActivity() {
     private var detectedClasses = arrayListOf<String>()
     private var confidenceValues = floatArrayOf()
     private var recognizedText: String? = null
-    private var rawJsonResult: String? = null
     private var imageUri: Uri? = null
-
-    companion object {
-        private const val TAG = "ResultActivity"
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +36,6 @@ class ResultActivity : AppCompatActivity() {
         detectedClasses = intent.getStringArrayListExtra("detected_classes") ?: arrayListOf()
         confidenceValues = intent.getFloatArrayExtra("confidence_values") ?: floatArrayOf()
         recognizedText = intent.getStringExtra("recognized_text")
-        rawJsonResult = intent.getStringExtra("raw_json_result")
 
         capturedImageUri?.let {
             val uri = Uri.parse(it)
@@ -47,17 +43,14 @@ class ResultActivity : AppCompatActivity() {
             val bitmap = getBitmapFromUri(uri)
             binding.imageView.setImageBitmap(bitmap)
         }
-
         if (detectedClasses.isNotEmpty()) {
             val className = detectedClasses[0]
             if (className != "berat") {
                 binding.editTextClassName.setText(className)
-            } else {
-                binding.editTextClassName.setText("")
             }
-        } else {
-            binding.editTextClassName.setText("")
         }
+
+        binding.editTextRecognizedText.setText(recognizedText ?: "")
 
         if (detectedClasses.isNotEmpty() && confidenceValues.isNotEmpty()) {
             val confidencePercent = String.format("%.2f", confidenceValues[0] * 100)
@@ -67,26 +60,8 @@ class ResultActivity : AppCompatActivity() {
             binding.textViewConfidence.visibility = View.GONE
         }
 
-        binding.editTextRecognizedText.setText(recognizedText)
-
-        // Display JSON result
-//        binding.jsonResultText.text = formatJsonForDisplay(rawJsonResult)
-//
-//        // Set up copy button
-//        binding.btnCopyJson.setOnClickListener {
-//            rawJsonResult?.let { json ->
-//                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                val clip = ClipData.newPlainText("JSON Result", json)
-//                clipboard.setPrimaryClip(clip)
-//                Toast.makeText(this, "JSON copied to clipboard", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-        binding.jsonResultText.visibility = View.GONE
-        binding.btnCopyJson.visibility = View.GONE
         binding.buttonSave.setOnClickListener {
-            // Add your save functionality here
-            Toast.makeText(this, "Data saved", Toast.LENGTH_SHORT).show()
-            finish()
+            saveToDatabase()
         }
 
         binding.buttonCancel.setOnClickListener {
@@ -94,26 +69,38 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBitmapFromUri(uri: Uri): Bitmap {
-        val file = File(uri.path!!)
-        val bitmap = BitmapFactory.decodeStream(FileInputStream(file))
-        return bitmap
+    private fun saveToDatabase() {
+        val veggieName = binding.editTextClassName.text.toString().trim()
+        val veggieWeight = binding.editTextRecognizedText.text.toString().trim()
+        val timestamp = getCurrentDateTime()
+
+        if (veggieName.isEmpty() || veggieWeight.isEmpty()) {
+            Toast.makeText(this, "Nama dan berat harus diisi", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val entry = VeggieEntity(
+            name = veggieName,
+            weight = veggieWeight,
+            timestamp = timestamp,
+        )
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            VeggieDatabase.getDatabase(applicationContext).veggieDao().insert(entry)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@ResultActivity, "Data berhasil disimpan", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
     }
 
-    private fun formatJsonForDisplay(jsonStr: String?): String {
-        if (jsonStr.isNullOrEmpty()) return "No detection results available"
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
+        val file = File(uri.path!!)
+        return BitmapFactory.decodeStream(FileInputStream(file))
+    }
 
-        return try {
-            // Parse JSON string
-            val jsonElement = JsonParser.parseString(jsonStr)
-
-            // Pretty print using Gson
-            val gson = GsonBuilder().setPrettyPrinting().create()
-            gson.toJson(jsonElement)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error formatting JSON: ${e.message}")
-            // If formatting fails, return as is
-            jsonStr
-        }
+    private fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return sdf.format(Date())
     }
 }

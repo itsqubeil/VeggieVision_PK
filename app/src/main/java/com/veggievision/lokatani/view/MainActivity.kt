@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         enableEdgeToEdge()
         setContentView(binding.root)
-//        clearTemporaryCapturedFiles()
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -52,6 +51,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.buttonNlp.setOnClickListener {
             val intent = Intent(this, NLPActivity::class.java)
+            startActivity(intent) }
+
+        binding.buttonRiwayat.setOnClickListener {
+            val intent = Intent(this, HistoryActivity::class.java)
             startActivity(intent) }
 
         val predictionData = loadPredictionData()
@@ -126,7 +129,6 @@ class MainActivity : AppCompatActivity() {
         barChart.data = barData
         barChart.setFitBars(true)
 
-        // Customize X-Axis
         val xAxis = barChart.xAxis
         xAxis.valueFormatter = IndexAxisValueFormatter(data.map { it.first })
         xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -134,20 +136,16 @@ class MainActivity : AppCompatActivity() {
         xAxis.setDrawGridLines(false)
         xAxis.labelRotationAngle = -45f
 
-        // Customize Y-Axis
         barChart.axisRight.isEnabled = false
-        barChart.axisLeft.axisMinimum = 0f // start y-axis from zero
+        barChart.axisLeft.axisMinimum = 0f
 
-        // Set description
         val description = Description()
         description.text = "Data Minggu Ini"
         description.textSize = 12f
         barChart.description = description
 
-        // Animate chart
         barChart.animateY(1500)
 
-        // Refresh
         barChart.invalidate()
     }
 
