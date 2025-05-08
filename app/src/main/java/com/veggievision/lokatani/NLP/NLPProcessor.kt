@@ -6,15 +6,36 @@ import java.util.regex.Pattern
 
 class NLPProcessor(private val dataManager: SayurDataManager) {
 
-    private val vegetablePattern = Pattern.compile("bayam|kangkung|pakcoy|tomat cerry|tomat")
-    private val todayPattern = Pattern.compile("hari ini")
-    private val yesterdayPattern = Pattern.compile("kemarin")
-    private val thisWeekPattern = Pattern.compile("minggu ini")
-    private val lastWeekPattern = Pattern.compile("minggu lalu")
-    private val lastMonthPattern = Pattern.compile("bulan lalu")
-    private val dayOfWeekPattern = Pattern.compile("\\b(senin|selasa|rabu|kamis|jumat|sabtu|minggu)\\b")
-    private val monthPattern = Pattern.compile("(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)(?:\\s*(\\d{4}))?")
-    private val datePattern = Pattern.compile("tanggal (\\d{1,2})\\s*(?:januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)\\s*(\\d{4})?")
+    private val vegetablePattern = Pattern.compile(
+        "\\b(ba[yie]am|baym|byam|baeam|baiam|bayem|bayaam|" +
+                "kangkung|kankung|kangkon|kankung|kangkun|" +
+                "pakcoy|pak coy|pakchoy|pakoj|pakoy|pakcoi|pakchoi|pokcoy|bok choy|" +
+                "tomatcherry|tomatcerry|tomat chery|tomat cerry|tomatchery|tomat cherry|cherry tomat|tomatceri)\\b"
+    )
+
+    private val multiVegetablePattern = Pattern.compile(
+        "(ba[yie]am|baym|byam|baeam|baiam|bayem|bayaam|" +
+                "kangkung|kankung|kangkon|kankung|kangkun|" +
+                "pakcoy|pak coy|pakchoy|pakoj|pakoy|pakcoi|pakchoi|pokcoy|bok choy|" +
+                "tomatcherry|tomatcerry|tomat chery|tomat cerry|tomatchery|tomat cherry|cherry tomat|tomatceri)[\\s]*(?:dan|\\+|&|,|\\s+)[\\s]*" +
+                "(ba[yie]am|baym|byam|baeam|baiam|bayem|bayaam|" +
+                "kangkung|kankung|kangkon|kankung|kangkun|" +
+                "pakcoy|pak coy|pakchoy|pakoj|pakoy|pakcoi|pakchoi|pokcoy|bok choy|" +
+                "tomatcherry|tomatcerry|tomat chery|tomat cerry|tomatchery|tomat cherry|cherry tomat|tomatceri)"
+    )
+
+    private val todayPattern = Pattern.compile("\\b(hari ini|hri ini|hr ini|sekarang)\\b")
+    private val yesterdayPattern = Pattern.compile("\\b(kemarin|kmrn|kemaren|kmaren)\\b")
+    private val thisWeekPattern = Pattern.compile("\\b(minggu ini|mingu ini|minggu yg ini|pekan ini|minggu skrg|minggu skrang|minggu sekarang)\\b")
+    private val lastWeekPattern = Pattern.compile("\\b(minggu lalu|minggu kemarin|minggu yg lalu|pekan lalu|mingu lalu|minggu kmrn|minggu yg lewat|minggu sebelumnya)\\b")
+    private val lastMonthPattern = Pattern.compile("\\b(bulan lalu|bulan kemarin|bulan yg lalu|bulan kmrn|bulan sebelumnya|bulan yg lewat)\\b")
+    private val dayOfWeekPattern = Pattern.compile("\\b(senin|selasa|rabu|kamis|jumat|jum'at|sabtu|minggu)\\b")
+    private val monthPattern = Pattern.compile("\\b(januari|jan|februari|feb|maret|mar|april|apr|mei|juni|jun|juli|jul|agustus|agt|agst|aug|september|sept|sep|oktober|okt|oct|november|nov|desember|des|dec)(?:\\s*(\\d{4}))?\\b")
+    private val datePattern = Pattern.compile("\\b(?:tanggal|tgl)\\s*(\\d{1,2})\\s*(?:januari|jan|februari|feb|maret|mar|april|apr|mei|juni|jun|juli|jul|agustus|agt|agst|aug|september|sept|sep|oktober|okt|oct|november|nov|desember|des|dec)\\s*(\\d{4})?\\b")
+    private val yearPattern = Pattern.compile("\\b(tahun|thn|thn\\.|th)\\s*(\\d{4})\\b")
+    private val lastYearPattern = Pattern.compile("\\b(tahun|thn|thn\\.|th)\\s*(lalu|kemarin|kmrn|sebelumnya|yg lalu)\\b")
+    private val thisYearPattern = Pattern.compile("\\b(tahun|thn|thn\\.|th)\\s*(ini|skrg|sekarang)\\b")
+    private val monthYearPattern = Pattern.compile("\\b(januari|jan|februari|feb|maret|mar|april|apr|mei|juni|jun|juli|jul|agustus|agt|agst|aug|september|sept|sep|oktober|okt|oct|november|nov|desember|des|dec)\\s+(tahun|thn|thn\\.|th)\\s+(lalu|kemarin|kmrn|sebelumnya|yg lalu)\\b")
 
     fun processQuery(query: String): String {
         val normalizedQuery = query.lowercase().replace(Regex("\\s+"), " ")
@@ -23,16 +44,36 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
             return processGeneralStatsQuery(normalizedQuery)
         }
 
+        val multiVegMatcher = multiVegetablePattern.matcher(normalizedQuery)
+        if (multiVegMatcher.find()) {
+            return "Maaf, hanya bisa mengambil 1 jenis sayur saja."
+        }
+
         val vegetableMatcher = vegetablePattern.matcher(normalizedQuery)
         val vegetableType = if (vegetableMatcher.find()) {
-            when (vegetableMatcher.group(0)) {
-                "tomat" -> if (normalizedQuery.contains("tomat cerry")) "tomat cerry" else "tomat"
-                else -> vegetableMatcher.group(0)
+            val matchedVeg = vegetableMatcher.group(0)
+            when {
+                matchedVeg.contains("bay") || matchedVeg.contains("bai") || matchedVeg.contains("bae") -> "bayam"
+                matchedVeg.contains("kang") || matchedVeg.contains("kank") -> "kangkung"
+                matchedVeg.contains("pak") || matchedVeg.contains("pok") || matchedVeg.contains("bok") -> "pakcoy"
+                matchedVeg.contains("cerry") || matchedVeg.contains("chery") || matchedVeg.contains("cherry") || matchedVeg.contains("ceri") -> "tomat cerry"
+                else -> matchedVeg
             }
-        } else if (normalizedQuery.contains("sayur")) {
+        } else if (normalizedQuery.contains("sayur") || normalizedQuery.contains("sayuran") || normalizedQuery.contains("syr")) {
             "semua"
         } else {
             return "Maaf, saya hanya mengenali jenis sayuran: bayam, kangkung, pakcoy, dan tomat cerry."
+        }
+
+        val monthYearMatcher = monthYearPattern.matcher(normalizedQuery)
+        if (monthYearMatcher.find()) {
+            return processMonthLastYearQuery(normalizedQuery, vegetableType)
+        }
+
+        val yearMatcher = yearPattern.matcher(normalizedQuery)
+        if (yearMatcher.find()) {
+            val year = yearMatcher.group(2).toInt()
+            return processSpecificYearQuery(vegetableType, year)
         }
 
         return when {
@@ -68,8 +109,16 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
                 processTodayQuery(vegetableType)
             }
 
+            lastYearPattern.matcher(normalizedQuery).find() -> {
+                processLastYearQuery(vegetableType)
+            }
+
+            thisYearPattern.matcher(normalizedQuery).find() -> {
+                processThisYearQuery(vegetableType)
+            }
+
             else -> {
-                "Maaf, mohon sertakan periode waktu yang jelas (misal: 'total bayam september 2024')"
+                "Maaf, mohon sertakan periode waktu yang jelas (misal: 'total bayam september 2024' atau 'bayam tahun 2023')"
             }
         }
     }
@@ -80,7 +129,13 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
                         query.contains("semua jenis") ||
                         query.contains("total keseluruhan") ||
                         query.contains("statistik") ||
-                        query.contains("rangkuman"))
+                        query.contains("stat") ||
+                        query.contains("rangkuman") ||
+                        query.contains("rekap") ||
+                        query.contains("sayuran apa saja") ||
+                        query.contains("sayur apa saja") ||
+                        query.contains("apa saja sayuran") ||
+                        query.contains("apa saja sayur"))
     }
 
     private fun processTodayQuery(vegetableType: String): String {
@@ -95,6 +150,144 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
         val today = formatter.format(Date())
 
         return "Berat total $vegetableType hari ini ($today) adalah ${String.format("%.2f", totalWeight)} kg."
+    }
+
+    private fun processLastYearQuery(vegetableType: String): String {
+        val calendar = Calendar.getInstance()
+        val currentYear = calendar.get(Calendar.YEAR)
+        val lastYear = currentYear - 1
+
+        calendar.set(Calendar.YEAR, lastYear)
+        calendar.set(Calendar.MONTH, Calendar.JANUARY)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val startDate = calendar.time
+
+        calendar.set(Calendar.MONTH, Calendar.DECEMBER)
+        calendar.set(Calendar.DAY_OF_MONTH, 31)
+        val endDate = calendar.time
+
+        val data = dataManager.getDataByTypeBetweenDates(vegetableType, startDate, endDate)
+
+        if (data.isEmpty()) {
+            return "Tidak ada data $vegetableType yang terdeteksi pada tahun $lastYear."
+        }
+
+        val totalWeight = data.sumOf { it.weight }
+        return "Berat total $vegetableType pada tahun $lastYear adalah ${String.format("%.2f", totalWeight)} kg."
+    }
+
+    private fun processSpecificYearQuery(vegetableType: String, year: Int): String {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.YEAR, year)
+        calendar.set(Calendar.MONTH, Calendar.JANUARY)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val startDate = calendar.time
+
+        calendar.set(Calendar.MONTH, Calendar.DECEMBER)
+        calendar.set(Calendar.DAY_OF_MONTH, 31)
+        val endDate = calendar.time
+
+        val data = dataManager.getDataByTypeBetweenDates(vegetableType, startDate, endDate)
+
+        if (data.isEmpty()) {
+            return "Tidak ada data $vegetableType yang terdeteksi pada tahun $year."
+        }
+
+        val totalWeight = data.sumOf { it.weight }
+        return "Berat total $vegetableType pada tahun $year adalah ${String.format("%.2f", totalWeight)} kg."
+    }
+
+    private fun processMonthLastYearQuery(query: String, vegetableType: String): String {
+        val monthYearMatcher = monthYearPattern.matcher(query)
+        if (!monthYearMatcher.find()) {
+            return "Maaf, saya tidak mengenali bulan atau tahun yang Anda maksud."
+        }
+
+        val monthName = monthYearMatcher.group(1)
+
+        val monthMap = mapOf(
+            "januari" to 0, "jan" to 0,
+            "februari" to 1, "feb" to 1,
+            "maret" to 2, "mar" to 2,
+            "april" to 3, "apr" to 3,
+            "mei" to 4,
+            "juni" to 5, "jun" to 5,
+            "juli" to 6, "jul" to 6,
+            "agustus" to 7, "agt" to 7, "agst" to 7, "aug" to 7,
+            "september" to 8, "sept" to 8, "sep" to 8,
+            "oktober" to 9, "okt" to 9, "oct" to 9,
+            "november" to 10, "nov" to 10,
+            "desember" to 11, "des" to 11, "dec" to 11
+        )
+
+        val monthIndex = monthMap[monthName] ?: return "Bulan tidak valid."
+
+        val calendar = Calendar.getInstance()
+        val currentYear = calendar.get(Calendar.YEAR)
+        val lastYear = currentYear - 1
+
+        calendar.set(Calendar.YEAR, lastYear)
+        calendar.set(Calendar.MONTH, monthIndex)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        val startDate = calendar.time
+
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        val endDate = calendar.time
+
+        val fullMonthName = when (monthIndex) {
+            0 -> "Januari"
+            1 -> "Februari"
+            2 -> "Maret"
+            3 -> "April"
+            4 -> "Mei"
+            5 -> "Juni"
+            6 -> "Juli"
+            7 -> "Agustus"
+            8 -> "September"
+            9 -> "Oktober"
+            10 -> "November"
+            11 -> "Desember"
+            else -> monthName
+        }
+
+        val data = dataManager.getDataByTypeBetweenDates(vegetableType, startDate, endDate)
+
+        if (data.isEmpty()) {
+            return "Tidak ada data $vegetableType yang terdeteksi pada bulan $fullMonthName tahun lalu ($lastYear)."
+        }
+
+        val totalWeight = data.sumOf { it.weight }
+        return "Berat total $vegetableType pada bulan $fullMonthName tahun lalu ($lastYear) adalah ${String.format("%.2f", totalWeight)} kg."
+    }
+
+    private fun processThisYearQuery(vegetableType: String): String {
+        val calendar = Calendar.getInstance()
+        val currentYear = calendar.get(Calendar.YEAR)
+
+        calendar.set(Calendar.YEAR, currentYear)
+        calendar.set(Calendar.MONTH, Calendar.JANUARY)
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        val startDate = calendar.time
+
+        calendar.set(Calendar.MONTH, Calendar.DECEMBER)
+        calendar.set(Calendar.DAY_OF_MONTH, 31)
+        val endDate = calendar.time
+
+        val data = dataManager.getDataByTypeBetweenDates(vegetableType, startDate, endDate)
+
+        if (data.isEmpty()) {
+            return "Tidak ada data $vegetableType yang terdeteksi pada tahun $currentYear."
+        }
+
+        val totalWeight = data.sumOf { it.weight }
+        return "Berat total $vegetableType pada tahun $currentYear adalah ${String.format("%.2f", totalWeight)} kg."
     }
 
     private fun processYesterdayQuery(vegetableType: String): String {
@@ -171,9 +364,18 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
         val yearStr = monthMatcher.group(2)
 
         val monthMap = mapOf(
-            "januari" to 0, "februari" to 1, "maret" to 2, "april" to 3,
-            "mei" to 4, "juni" to 5, "juli" to 6, "agustus" to 7,
-            "september" to 8, "oktober" to 9, "november" to 10, "desember" to 11
+            "januari" to 0, "jan" to 0,
+            "februari" to 1, "feb" to 1,
+            "maret" to 2, "mar" to 2,
+            "april" to 3, "apr" to 3,
+            "mei" to 4,
+            "juni" to 5, "jun" to 5,
+            "juli" to 6, "jul" to 6,
+            "agustus" to 7, "agt" to 7, "agst" to 7, "aug" to 7,
+            "september" to 8, "sept" to 8, "sep" to 8,
+            "oktober" to 9, "okt" to 9, "oct" to 9,
+            "november" to 10, "nov" to 10,
+            "desember" to 11, "des" to 11, "dec" to 11
         )
 
         val monthIndex = monthMap[monthName] ?: return "Bulan tidak valid."
@@ -189,18 +391,36 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
         calendar.set(Calendar.SECOND, 0)
         val startDate = calendar.time
 
-        calendar.add(Calendar.MONTH, 1)
-        calendar.add(Calendar.MILLISECOND, -1)
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
         val endDate = calendar.time
+
+        val fullMonthName = when (monthIndex) {
+            0 -> "Januari"
+            1 -> "Februari"
+            2 -> "Maret"
+            3 -> "April"
+            4 -> "Mei"
+            5 -> "Juni"
+            6 -> "Juli"
+            7 -> "Agustus"
+            8 -> "September"
+            9 -> "Oktober"
+            10 -> "November"
+            11 -> "Desember"
+            else -> monthName
+        }
 
         val data = dataManager.getDataByTypeBetweenDates(vegetableType, startDate, endDate)
 
         if (data.isEmpty()) {
-            return "Tidak ada data $vegetableType yang terdeteksi pada bulan $monthName $year."
+            return "Tidak ada data $vegetableType yang terdeteksi pada bulan $fullMonthName $year."
         }
 
         val totalWeight = data.sumOf { it.weight }
-        return "Berat total $vegetableType pada bulan $monthName $year adalah ${String.format("%.2f", totalWeight)} kg."
+        return "Berat total $vegetableType pada bulan $fullMonthName $year adalah ${String.format("%.2f", totalWeight)} kg."
     }
 
     private fun processDateQuery(query: String, vegetableType: String): String {
@@ -221,9 +441,18 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
         val yearStr = monthMatcher.group(2)
 
         val monthMap = mapOf(
-            "januari" to 0, "februari" to 1, "maret" to 2, "april" to 3,
-            "mei" to 4, "juni" to 5, "juli" to 6, "agustus" to 7,
-            "september" to 8, "oktober" to 9, "november" to 10, "desember" to 11
+            "januari" to 0, "jan" to 0,
+            "februari" to 1, "feb" to 1,
+            "maret" to 2, "mar" to 2,
+            "april" to 3, "apr" to 3,
+            "mei" to 4,
+            "juni" to 5, "jun" to 5,
+            "juli" to 6, "jul" to 6,
+            "agustus" to 7, "agt" to 7, "agst" to 7, "aug" to 7,
+            "september" to 8, "sept" to 8, "sep" to 8,
+            "oktober" to 9, "okt" to 9, "oct" to 9,
+            "november" to 10, "nov" to 10,
+            "desember" to 11, "des" to 11, "dec" to 11
         )
         val monthIdx = monthMap[monthName] ?: Calendar.getInstance().get(Calendar.MONTH)
         val year = yearStr?.toIntOrNull() ?: Calendar.getInstance().get(Calendar.YEAR)
@@ -279,18 +508,61 @@ class NLPProcessor(private val dataManager: SayurDataManager) {
             return "Tidak ada data sayuran yang tersedia."
         }
 
-        val groupedByType = allData.groupBy { it.vegetableType }
-
         val timeFrameData = when {
             thisWeekPattern.matcher(query).find() -> dataManager.getDataForCurrentWeek()
             todayPattern.matcher(query).find() -> dataManager.getDataForToday()
+            lastMonthPattern.matcher(query).find() -> {
+                val calendar = Calendar.getInstance()
+                calendar.add(Calendar.MONTH, -1)
+                calendar.set(Calendar.DAY_OF_MONTH, 1)
+                val startOfLastMonth = calendar.time
+
+                calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+                val endOfLastMonth = calendar.time
+
+                dataManager.getAllDataBetweenDates(startOfLastMonth, endOfLastMonth)
+            }
             else -> allData
         }
+
+        if (timeFrameData.isEmpty()) {
+            val timeFrameText = when {
+                thisWeekPattern.matcher(query).find() -> "minggu ini"
+                todayPattern.matcher(query).find() -> "hari ini"
+                lastMonthPattern.matcher(query).find() -> "bulan lalu"
+                lastYearPattern.matcher(query).find() -> "tahun lalu"
+                else -> "periode yang diminta"
+            }
+            return "Tidak ada data sayuran yang terdeteksi pada $timeFrameText."
+        }
+
+        val groupedByType = timeFrameData.groupBy { it.vegetableType }
 
         val timeFrameText = when {
             thisWeekPattern.matcher(query).find() -> "minggu ini"
             todayPattern.matcher(query).find() -> "hari ini"
+            lastMonthPattern.matcher(query).find() -> "bulan lalu"
+            lastYearPattern.matcher(query).find() -> "tahun lalu"
             else -> "keseluruhan"
+        }
+
+        if (query.contains("apa saja") || query.contains("apa aja") || query.contains("jenisnya")) {
+            val totalWeight = timeFrameData.sumOf { it.weight }
+            val vegetableDetailsList = groupedByType.entries
+                .sortedByDescending { it.value.sumOf { item -> item.weight } }
+                .joinToString("\n") { entry ->
+                    val vegType = entry.key
+                    val vegWeight = entry.value.sumOf { it.weight }
+                    "- $vegType: ${String.format("%.2f", vegWeight)} kg"
+                }
+
+            return """
+                Daftar sayuran $timeFrameText:
+                $vegetableDetailsList
+                
+                Total berat keseluruhan: ${String.format("%.2f", totalWeight)} kg
+                Total jenis sayuran: ${groupedByType.size} jenis
+            """.trimIndent()
         }
 
         val totalWeight = timeFrameData.sumOf { it.weight }

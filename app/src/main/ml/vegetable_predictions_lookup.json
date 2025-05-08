@@ -1,0 +1,490 @@
+{
+  "1": [
+    {
+      "sayur_code": 15,
+      "sayur_name": "cabai merah besar",
+      "prediction": 7.052900106429518
+    },
+    {
+      "sayur_code": 2,
+      "sayur_name": "bawang bombay",
+      "prediction": 4.192699814074813
+    },
+    {
+      "sayur_code": 1,
+      "sayur_name": "basil konven",
+      "prediction": 3.6968088439338436
+    },
+    {
+      "sayur_code": 10,
+      "sayur_name": "beras pera",
+      "prediction": 3.3819821428571437
+    },
+    {
+      "sayur_code": 9,
+      "sayur_name": "beras ketan putih",
+      "prediction": 2.6831150793650793
+    },
+    {
+      "sayur_code": 0,
+      "sayur_name": "asparagus",
+      "prediction": 2.6173624153624155
+    },
+    {
+      "sayur_code": 8,
+      "sayur_name": "beras ketan hitam",
+      "prediction": 2.38
+    },
+    {
+      "sayur_code": 13,
+      "sayur_name": "cabai keriting hijau",
+      "prediction": 2.195238095238095
+    },
+    {
+      "sayur_code": 14,
+      "sayur_name": "cabai keriting merah",
+      "prediction": 2.187865079365079
+    },
+    {
+      "sayur_code": 6,
+      "sayur_name": "bengkoang",
+      "prediction": 2.0
+    },
+    {
+      "sayur_code": 7,
+      "sayur_name": "beras ketan",
+      "prediction": 2.0
+    },
+    {
+      "sayur_code": 18,
+      "sayur_name": "cabai rawit merah",
+      "prediction": 1.9341666666666668
+    },
+    {
+      "sayur_code": 5,
+      "sayur_name": "bawang putih",
+      "prediction": 1.846666666666667
+    },
+    {
+      "sayur_code": 19,
+      "sayur_name": "cuciwis",
+      "prediction": 1.7244563492063498
+    },
+    {
+      "sayur_code": 11,
+      "sayur_name": "cabai hijau besar",
+      "prediction": 1.6875496031746031
+    },
+    {
+      "sayur_code": 12,
+      "sayur_name": "cabai kering",
+      "prediction": 1.6875496031746031
+    },
+    {
+      "sayur_code": 3,
+      "sayur_name": "bawang bombay merah",
+      "prediction": 1.4810000000000003
+    },
+    {
+      "sayur_code": 4,
+      "sayur_name": "bawang merah",
+      "prediction": 1.4555833333333337
+    },
+    {
+      "sayur_code": 16,
+      "sayur_name": "cabai rawit",
+      "prediction": 1.2853055555555557
+    },
+    {
+      "sayur_code": 17,
+      "sayur_name": "cabai rawit hijau",
+      "prediction": 0.8093482142857141
+    },
+    {
+      "sayur_code": 20,
+      "sayur_name": "daun jeruk",
+      "prediction": 0.6057791666666666
+    },
+    {
+      "sayur_code": 21,
+      "sayur_name": "daun kari",
+      "prediction": 0.546575
+    },
+    {
+      "sayur_code": 23,
+      "sayur_name": "daun kunyit",
+      "prediction": 0.4832311507936506
+    },
+    {
+      "sayur_code": 22,
+      "sayur_name": "daun ketumbar",
+      "prediction": 0.4662394841269839
+    }
+  ],
+  "2": [
+    {
+      "sayur_code": 15,
+      "sayur_name": "cabai merah besar",
+      "prediction": 7.412176656676654
+    },
+    {
+      "sayur_code": 1,
+      "sayur_name": "basil konven",
+      "prediction": 3.14375
+    },
+    {
+      "sayur_code": 10,
+      "sayur_name": "beras pera",
+      "prediction": 2.9983333333333326
+    },
+    {
+      "sayur_code": 2,
+      "sayur_name": "bawang bombay",
+      "prediction": 2.2549816017316022
+    },
+    {
+      "sayur_code": 13,
+      "sayur_name": "cabai keriting hijau",
+      "prediction": 1.9039047619047615
+    },
+    {
+      "sayur_code": 9,
+      "sayur_name": "beras ketan putih",
+      "prediction": 1.8765000000000003
+    },
+    {
+      "sayur_code": 18,
+      "sayur_name": "cabai rawit merah",
+      "prediction": 1.6997043650793657
+    },
+    {
+      "sayur_code": 3,
+      "sayur_name": "bawang bombay merah",
+      "prediction": 1.693265873015873
+    },
+    {
+      "sayur_code": 8,
+      "sayur_name": "beras ketan hitam",
+      "prediction": 1.689382936507937
+    },
+    {
+      "sayur_code": 4,
+      "sayur_name": "bawang merah",
+      "prediction": 1.5857658730158732
+    },
+    {
+      "sayur_code": 14,
+      "sayur_name": "cabai keriting merah",
+      "prediction": 1.5350833333333338
+    },
+    {
+      "sayur_code": 11,
+      "sayur_name": "cabai hijau besar",
+      "prediction": 1.4861805555555556
+    },
+    {
+      "sayur_code": 12,
+      "sayur_name": "cabai kering",
+      "prediction": 1.4861805555555556
+    },
+    {
+      "sayur_code": 7,
+      "sayur_name": "beras ketan",
+      "prediction": 1.404263888888889
+    },
+    {
+      "sayur_code": 6,
+      "sayur_name": "bengkoang",
+      "prediction": 1.3515019841269842
+    },
+    {
+      "sayur_code": 0,
+      "sayur_name": "asparagus",
+      "prediction": 1.30375
+    },
+    {
+      "sayur_code": 5,
+      "sayur_name": "bawang putih",
+      "prediction": 1.3035376984126983
+    },
+    {
+      "sayur_code": 16,
+      "sayur_name": "cabai rawit",
+      "prediction": 1.1928472222222224
+    },
+    {
+      "sayur_code": 19,
+      "sayur_name": "cuciwis",
+      "prediction": 1.0125
+    },
+    {
+      "sayur_code": 17,
+      "sayur_name": "cabai rawit hijau",
+      "prediction": 0.9615565476190475
+    },
+    {
+      "sayur_code": 21,
+      "sayur_name": "daun kari",
+      "prediction": 0.4642380952380952
+    },
+    {
+      "sayur_code": 23,
+      "sayur_name": "daun kunyit",
+      "prediction": 0.4503994047619048
+    },
+    {
+      "sayur_code": 22,
+      "sayur_name": "daun ketumbar",
+      "prediction": 0.40313988095238096
+    },
+    {
+      "sayur_code": 20,
+      "sayur_name": "daun jeruk",
+      "prediction": 0.3867867063492064
+    }
+  ],
+  "3": [
+    {
+      "sayur_code": 10,
+      "sayur_name": "beras pera",
+      "prediction": 7.37
+    },
+    {
+      "sayur_code": 15,
+      "sayur_name": "cabai merah besar",
+      "prediction": 5.9007704517704545
+    },
+    {
+      "sayur_code": 9,
+      "sayur_name": "beras ketan putih",
+      "prediction": 2.96
+    },
+    {
+      "sayur_code": 2,
+      "sayur_name": "bawang bombay",
+      "prediction": 2.957811327561327
+    },
+    {
+      "sayur_code": 13,
+      "sayur_name": "cabai keriting hijau",
+      "prediction": 2.9229868048618055
+    },
+    {
+      "sayur_code": 1,
+      "sayur_name": "basil konven",
+      "prediction": 2.908190476190477
+    },
+    {
+      "sayur_code": 8,
+      "sayur_name": "beras ketan hitam",
+      "prediction": 2.81
+    },
+    {
+      "sayur_code": 14,
+      "sayur_name": "cabai keriting merah",
+      "prediction": 2.6363204156954163
+    },
+    {
+      "sayur_code": 11,
+      "sayur_name": "cabai hijau besar",
+      "prediction": 2.388541666666667
+    },
+    {
+      "sayur_code": 12,
+      "sayur_name": "cabai kering",
+      "prediction": 2.0435416666666666
+    },
+    {
+      "sayur_code": 7,
+      "sayur_name": "beras ketan",
+      "prediction": 1.99
+    },
+    {
+      "sayur_code": 18,
+      "sayur_name": "cabai rawit merah",
+      "prediction": 1.910484126984127
+    },
+    {
+      "sayur_code": 6,
+      "sayur_name": "bengkoang",
+      "prediction": 1.87
+    },
+    {
+      "sayur_code": 0,
+      "sayur_name": "asparagus",
+      "prediction": 1.6135476190476188
+    },
+    {
+      "sayur_code": 3,
+      "sayur_name": "bawang bombay merah",
+      "prediction": 1.5440995670995676
+    },
+    {
+      "sayur_code": 16,
+      "sayur_name": "cabai rawit",
+      "prediction": 1.3252132034632031
+    },
+    {
+      "sayur_code": 4,
+      "sayur_name": "bawang merah",
+      "prediction": 1.145
+    },
+    {
+      "sayur_code": 5,
+      "sayur_name": "bawang putih",
+      "prediction": 1.12
+    },
+    {
+      "sayur_code": 17,
+      "sayur_name": "cabai rawit hijau",
+      "prediction": 0.9774880952380954
+    },
+    {
+      "sayur_code": 19,
+      "sayur_name": "cuciwis",
+      "prediction": 0.8423333333333335
+    },
+    {
+      "sayur_code": 23,
+      "sayur_name": "daun kunyit",
+      "prediction": 0.4479257936507936
+    },
+    {
+      "sayur_code": 22,
+      "sayur_name": "daun ketumbar",
+      "prediction": 0.3584596681096681
+    },
+    {
+      "sayur_code": 21,
+      "sayur_name": "daun kari",
+      "prediction": 0.3465371031746032
+    },
+    {
+      "sayur_code": 20,
+      "sayur_name": "daun jeruk",
+      "prediction": 0.29290218253968253
+    }
+  ],
+  "4": [
+    {
+      "sayur_code": 2,
+      "sayur_name": "bawang bombay",
+      "prediction": 8.295010776804897
+    },
+    {
+      "sayur_code": 10,
+      "sayur_name": "beras pera",
+      "prediction": 4.187273809523809
+    },
+    {
+      "sayur_code": 1,
+      "sayur_name": "basil konven",
+      "prediction": 4.134253968253967
+    },
+    {
+      "sayur_code": 9,
+      "sayur_name": "beras ketan putih",
+      "prediction": 3.6575238095238087
+    },
+    {
+      "sayur_code": 0,
+      "sayur_name": "asparagus",
+      "prediction": 3.617708513708513
+    },
+    {
+      "sayur_code": 8,
+      "sayur_name": "beras ketan hitam",
+      "prediction": 3.4776547619047617
+    },
+    {
+      "sayur_code": 7,
+      "sayur_name": "beras ketan",
+      "prediction": 3.3071130952380945
+    },
+    {
+      "sayur_code": 15,
+      "sayur_name": "cabai merah besar",
+      "prediction": 3.056474025974026
+    },
+    {
+      "sayur_code": 3,
+      "sayur_name": "bawang bombay merah",
+      "prediction": 2.3447440476190478
+    },
+    {
+      "sayur_code": 6,
+      "sayur_name": "bengkoang",
+      "prediction": 2.3315773809523814
+    },
+    {
+      "sayur_code": 4,
+      "sayur_name": "bawang merah",
+      "prediction": 2.327744047619048
+    },
+    {
+      "sayur_code": 5,
+      "sayur_name": "bawang putih",
+      "prediction": 2.321577380952381
+    },
+    {
+      "sayur_code": 13,
+      "sayur_name": "cabai keriting hijau",
+      "prediction": 2.2787123015873014
+    },
+    {
+      "sayur_code": 16,
+      "sayur_name": "cabai rawit",
+      "prediction": 2.153119047619047
+    },
+    {
+      "sayur_code": 14,
+      "sayur_name": "cabai keriting merah",
+      "prediction": 1.8985984848484854
+    },
+    {
+      "sayur_code": 11,
+      "sayur_name": "cabai hijau besar",
+      "prediction": 1.7447738095238097
+    },
+    {
+      "sayur_code": 17,
+      "sayur_name": "cabai rawit hijau",
+      "prediction": 1.5205982142857137
+    },
+    {
+      "sayur_code": 12,
+      "sayur_name": "cabai kering",
+      "prediction": 1.4881190476190478
+    },
+    {
+      "sayur_code": 18,
+      "sayur_name": "cabai rawit merah",
+      "prediction": 1.135
+    },
+    {
+      "sayur_code": 19,
+      "sayur_name": "cuciwis",
+      "prediction": 0.9138531746031746
+    },
+    {
+      "sayur_code": 23,
+      "sayur_name": "daun kunyit",
+      "prediction": 0.48779166666666685
+    },
+    {
+      "sayur_code": 22,
+      "sayur_name": "daun ketumbar",
+      "prediction": 0.46595833333333353
+    },
+    {
+      "sayur_code": 21,
+      "sayur_name": "daun kari",
+      "prediction": 0.4471426406926407
+    },
+    {
+      "sayur_code": 20,
+      "sayur_name": "daun jeruk",
+      "prediction": 0.4404402597402597
+    }
+  ]
+}

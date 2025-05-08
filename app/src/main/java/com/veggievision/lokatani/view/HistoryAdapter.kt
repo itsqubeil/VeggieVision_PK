@@ -1,7 +1,9 @@
 package com.veggievision.lokatani.view
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.veggievision.lokatani.data.VeggieEntity
@@ -9,27 +11,27 @@ import com.veggievision.lokatani.databinding.ItemHistoryBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder>(VeggieDiffCallback()) {
+class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder>(DIFF_CALLBACK) {
 
-    private val selectedItems = mutableSetOf<VeggieEntity>()
+    private val selectedItemIds = mutableSetOf<Int>()
 
-    class VeggieViewHolder(private val binding: ItemHistoryBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class VeggieViewHolder(private val binding: ItemHistoryBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
         fun bind(item: VeggieEntity, isSelected: Boolean) {
             binding.textName.text = item.name
-            binding.textWeight.text = "${item.weight} gr"
+            binding.textWeight.text = "${item.weight} gram"
+            binding.textTimestamp.text = item.timestamp
+            binding.checkbox.isChecked = isSelected
 
-            try {
-                val timestamp = item.timestamp.toLongOrNull()
-                val date = if (timestamp != null) {
-                    SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(timestamp))
-                } else {
-                    item.timestamp
-                }
-                binding.textTimestamp.text = date
-            } catch (e: Exception) {
-                binding.textTimestamp.text = item.timestamp
+            // Saat item atau checkbox di-klik, toggle pilihan
+            binding.root.setOnClickListener {
+                toggleSelection(item.id)
             }
-            binding.root.isSelected = isSelected
+
+            binding.checkbox.setOnClickListener {
+                toggleSelection(item.id)
+            }
         }
     }
 
@@ -40,28 +42,40 @@ class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder
 
     override fun onBindViewHolder(holder: VeggieViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item, selectedItems.contains(item))
-
-        holder.itemView.setOnClickListener {
-            toggleSelection(item)
-            notifyItemChanged(position)
-        }
+        val isSelected = selectedItemIds.contains(item.id)
+        holder.bind(item, isSelected)
     }
 
-    private fun toggleSelection(item: VeggieEntity) {
-        if (selectedItems.contains(item)) {
-            selectedItems.remove(item)
+    fun toggleSelection(id: Int) {
+        if (selectedItemIds.contains(id)) {
+            selectedItemIds.remove(id)
         } else {
-            selectedItems.add(item)
+            selectedItemIds.add(id)
         }
+        notifyDataSetChanged()
+    }
+
+    fun clearSelection() {
+        selectedItemIds.clear()
+        notifyDataSetChanged()
+    }
+
+    fun selectAll() {
+        currentList.forEach { selectedItemIds.add(it.id) }
+        notifyDataSetChanged()
     }
 
     fun getSelectedItems(): List<VeggieEntity> {
-        return selectedItems.toList()
+        return currentList.filter { selectedItemIds.contains(it.id) }
     }
-}
 
-class VeggieDiffCallback : androidx.recyclerview.widget.DiffUtil.ItemCallback<VeggieEntity>() {
-    override fun areItemsTheSame(oldItem: VeggieEntity, newItem: VeggieEntity) = oldItem.id == newItem.id
-    override fun areContentsTheSame(oldItem: VeggieEntity, newItem: VeggieEntity) = oldItem == newItem
+    companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<VeggieEntity>() {
+            override fun areItemsTheSame(oldItem: VeggieEntity, newItem: VeggieEntity) =
+                oldItem.id == newItem.id
+
+            override fun areContentsTheSame(oldItem: VeggieEntity, newItem: VeggieEntity) =
+                oldItem == newItem
+        }
+    }
 }
