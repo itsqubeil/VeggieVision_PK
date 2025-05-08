@@ -50,6 +50,10 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, CameraActivity::class.java)
             startActivity(intent) }
 
+        binding.buttonNlp.setOnClickListener {
+            val intent = Intent(this, NLPActivity::class.java)
+            startActivity(intent) }
+
         val predictionData = loadPredictionData()
 
         if (predictionData.isNotEmpty()) {

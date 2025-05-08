@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +20,8 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
@@ -49,6 +50,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     private var capturedBitmap: Bitmap? = null
     private var detectedBoundingBoxes: List<BoundingBox> = emptyList()
     private var recognizedText: String? = null
+    private var rawJsonResult: String? = null
 
     private lateinit var cameraExecutor: ExecutorService
     private val requestPermissionLauncher =
@@ -91,6 +93,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
             capturedBitmap = null
             detectedBoundingBoxes = emptyList()
             recognizedText = null
+            rawJsonResult = null
             resetUI()
             cameraProvider = cameraProviderFuture.get()
             bindCameraUseCases()
@@ -146,6 +149,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
         capturedBitmap = null
         detectedBoundingBoxes = emptyList()
         recognizedText = null
+        rawJsonResult = null
         showLoading(true)
         binding.captureButton.isEnabled = false
 
@@ -227,13 +231,64 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
-       val file = File(cacheDir, "captured_image_${System.currentTimeMillis()}.png")
-        val outputStream = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        outputStream.flush()
-        outputStream.close()
+        // Add timestamp to filename to avoid duplicates
+        val filename = "captured_image_${System.currentTimeMillis()}.png"
+        val file = File(cacheDir, filename)
+
+        // Use PNG with 100% quality as requested
+        FileOutputStream(file).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+            outputStream.flush()
+        }
 
         return Uri.fromFile(file)
+    }
+
+    private fun createJsonResult(): String {
+        try {
+            // Create data classes for Gson serialization
+            data class Detection(
+                val `class`: String,
+                val confidence: Float,
+                val x1: Float,
+                val y1: Float,
+                val x2: Float,
+                val y2: Float
+            )
+
+            data class ResultData(
+                val detections: List<Detection>,
+                val recognizedText: String?,
+                val timestamp: Long
+            )
+
+            // Create detections list
+            val detectionsList = detectedBoundingBoxes.map { box ->
+                Detection(
+                    `class` = box.clsName,
+                    confidence = box.cnf,
+                    x1 = box.x1,
+                    y1 = box.y1,
+                    x2 = box.x2,
+                    y2 = box.y2
+                )
+            }
+
+            // Create result object
+            val resultData = ResultData(
+                detections = detectionsList,
+                recognizedText = recognizedText,
+                timestamp = System.currentTimeMillis()
+            )
+
+            // Use Gson to convert to JSON
+            val gson = GsonBuilder().setPrettyPrinting().create()
+            return gson.toJson(resultData)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error creating JSON with Gson: ${e.message}")
+            return "{\"error\":\"Failed to create JSON\"}"
+        }
     }
 
     private fun navigateToResultActivity() {
@@ -249,10 +304,14 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
                 confidenceValues[i] = box.cnf
             }
 
+            // Create raw JSON result
+            rawJsonResult = createJsonResult()
+
             val intent = Intent(this, ResultActivity::class.java).apply {
                 putExtra("captured_image_uri", fileUri.toString())
                 putStringArrayListExtra("detected_classes", detectedClasses)
                 putExtra("confidence_values", confidenceValues)
+                putExtra("raw_json_result", rawJsonResult)
 
                 recognizedText?.let { text ->
                     putExtra("recognized_text", text)
@@ -276,7 +335,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     override fun onEmptyDetect() {
         if (!isFinishing && !isDestroyed) {
             runOnUiThread {
-                 navigateToResultActivity()
+                navigateToResultActivity()
             }
         }
     }
@@ -324,7 +383,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
         } else {
-           startCamera()
+            startCamera()
         }
     }
 

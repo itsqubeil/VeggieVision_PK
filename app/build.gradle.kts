@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.veggievision.lokatani"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -53,13 +53,14 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-
+    implementation (libs.poi)
+    implementation ("org.apache.poi:poi-ooxml:5.2.3")
     implementation(libs.tensorflow.lite.metadata)
     implementation (libs.tensorflow.lite.task.vision)
     implementation (libs.tensorflow.lite)
     implementation (libs.tensorflow.lite.gpu)  // Add this line
     implementation (libs.tensorflow.lite.support)
     implementation (libs.text.recognition)
-
+    implementation (libs.gson)
     implementation (libs.mpandroidchart)
 }
