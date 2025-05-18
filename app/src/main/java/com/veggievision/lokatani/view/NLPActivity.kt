@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,9 @@ import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type
 
 class NLPActivity : AppCompatActivity() {
     private lateinit var binding: ActivityNlpBinding
@@ -38,7 +43,10 @@ class NLPActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         historyAdapter = NLPHistoryAdapter(queryHistory)
-        binding.rvHistory.layoutManager = LinearLayoutManager(this)
+        binding.rvHistory.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd = false
+            reverseLayout = true
+        }
         binding.rvHistory.adapter = historyAdapter
 
         binding.btnImportExcel.setOnClickListener {
@@ -54,8 +62,24 @@ class NLPActivity : AppCompatActivity() {
                 queryHistory.add(0, Pair(query, response))
                 historyAdapter.notifyItemInserted(0)
 
+                binding.rvHistory.scrollToPosition(0)
+
                 binding.etQuery.text.clear()
             }
+        }
+
+        // Fix layout when keyboard visible
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
+            view.setPadding(0, 0, 0, maxOf(imeHeight, navBarHeight))
+            val imeVisible = insets.isVisible(Type.ime())
+
+            binding.tvQueryLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+            binding.tvResponseLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+            binding.btnImportExcel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+
+            insets
         }
     }
 

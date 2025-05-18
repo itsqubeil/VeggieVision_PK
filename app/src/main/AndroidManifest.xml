@@ -27,7 +27,7 @@
             android:exported="false" />
         <activity
             android:name=".view.NLPActivity"
-            android:exported="false" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".view.ResultActivity"
             android:exported="false" />

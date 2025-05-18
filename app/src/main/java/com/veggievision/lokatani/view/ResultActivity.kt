@@ -54,7 +54,7 @@ class ResultActivity : AppCompatActivity() {
 
         if (detectedClasses.isNotEmpty() && confidenceValues.isNotEmpty()) {
             val confidencePercent = String.format("%.2f", confidenceValues[0] * 100)
-            binding.textViewConfidence.text = "Akurasi: $confidencePercent%"
+            binding.textViewConfidence.text = "Confidence: $confidencePercent%"
             binding.textViewConfidence.visibility = View.VISIBLE
         } else {
             binding.textViewConfidence.visibility = View.GONE
