@@ -4,15 +4,18 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraXThreads.TAG
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.veggievision.lokatani.R
-import com.veggievision.lokatani.databinding.ActivityMainBinding
+//import com.veggievision.lokatani.databinding.ActivityMainBinding
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
@@ -20,65 +23,65 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.veggievision.lokatani.databinding.FragmentMainBinding
 import org.json.JSONObject
 import java.io.InputStream
 import java.util.Calendar
 
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+class MainFragment : Fragment() {
+
+    private var _binding: FragmentMainBinding? = null
+    private val binding get() = _binding!!
     private lateinit var barChart: BarChart
-    private lateinit var tvTitle: TextView
-    override fun onCreate(savedInstanceState: Bundle?) {
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            Log.e("main", "Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable)
-        }
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
-        setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentMainBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         barChart = binding.barChart
-        tvTitle = binding.tvTitle
-        binding.button.setOnClickListener {
-            val intent = Intent(this, CameraActivity::class.java)
-            startActivity(intent) }
 
-        binding.buttonNlp.setOnClickListener {
-            val intent = Intent(this, NLPActivity::class.java)
-            startActivity(intent) }
-
-        binding.buttonRiwayat.setOnClickListener {
-            val intent = Intent(this, HistoryActivity::class.java)
-            startActivity(intent) }
+//        binding.button.setOnClickListener {
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, CameraFragment())
+//                .addToBackStack(null)
+//                .commit()
+//        }
+//
+//        binding.buttonNlp.setOnClickListener {
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, NLPFragment())
+//                .addToBackStack(null)
+//                .commit()
+//        }
+//
+//        binding.buttonRiwayat.setOnClickListener {
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, HistoryFragment())
+//                .addToBackStack(null)
+//                .commit()
+//        }
 
         val predictionData = loadPredictionData()
 
         if (predictionData.isNotEmpty()) {
             showChart(predictionData)
         } else {
-            Toast.makeText(this, "Data minggu ini tidak tersedia", Toast.LENGTH_SHORT).show()
-        }
-    }
-    private fun clearTemporaryCapturedFiles() {
-        val cacheDir = cacheDir
-        cacheDir.listFiles()?.forEach { file ->
-            if (file.name.startsWith("captured_image_uri")) {
-                file.delete()
-            }
+            Toast.makeText(requireContext(), "Data minggu ini tidak tersedia", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun loadPredictionData(): List<Pair<String, Float>> {
         val resultList = mutableListOf<Pair<String, Float>>()
-
         try {
-            val inputStream: InputStream = assets.open("vegetable_predictions_lookup.json")
+            val inputStream = requireContext().assets.open("vegetable_predictions_lookup.json")
             val jsonString = inputStream.bufferedReader().use { it.readText() }
             val jsonObject = JSONObject(jsonString)
 
@@ -86,28 +89,23 @@ class MainActivity : AppCompatActivity() {
 
             if (jsonObject.has(listId)) {
                 val sayurArray = jsonObject.getJSONArray(listId)
-
                 for (i in 0 until sayurArray.length()) {
                     val item = sayurArray.getJSONObject(i)
                     val name = item.getString("sayur_name")
                     val prediction = item.getDouble("prediction").toFloat()
-
-                    resultList.add(Pair(name, prediction))
+                    resultList.add(name to prediction)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(this, "Gagal memuat data", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Gagal memuat data", Toast.LENGTH_SHORT).show()
         }
-
         return resultList
     }
 
     private fun getCurrentWeekId(): String {
         val calendar = Calendar.getInstance()
-        val currentWeek = calendar.get(Calendar.WEEK_OF_MONTH)
-
-        return when (currentWeek) {
+        return when (calendar.get(Calendar.WEEK_OF_MONTH)) {
             1 -> "1"
             2 -> "2"
             3 -> "3"
@@ -116,13 +114,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showChart(data: List<Pair<String, Float>>) {
-        val entries = data.mapIndexed { index, pair ->
-            BarEntry(index.toFloat(), pair.second)
-        }
-
+        val entries = data.mapIndexed { index, pair -> BarEntry(index.toFloat(), pair.second) }
         val dataSet = BarDataSet(entries, "Prediksi Sayuran")
         dataSet.colors = getColors(data.size)
-
         val barData = BarData(dataSet)
         barData.barWidth = 0.9f
 
@@ -145,7 +139,6 @@ class MainActivity : AppCompatActivity() {
         barChart.description = description
 
         barChart.animateY(1500)
-
         barChart.invalidate()
     }
 
@@ -163,5 +156,10 @@ class MainActivity : AppCompatActivity() {
             Color.parseColor("#FF9800")
         )
         return List(size) { colors[it % colors.size] }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

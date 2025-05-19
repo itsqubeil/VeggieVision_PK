@@ -1,49 +1,70 @@
 package com.veggievision.lokatani.view
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.view.WindowManager
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.veggievision.lokatani.NLP.NLPProcessor
 import com.veggievision.lokatani.NLP.SayurDataManager
 import com.veggievision.lokatani.NLP.VegetableData
-import com.veggievision.lokatani.databinding.ActivityNlpBinding
+import com.veggievision.lokatani.databinding.FragmentNlpBinding
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type
 
-class NLPActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityNlpBinding
-    private val REQUEST_CODE_PICK_EXCEL = 101
-    private val PERMISSION_REQUEST_CODE = 102
+class NLPFragment : Fragment() {
+
+    private var _binding: FragmentNlpBinding? = null
+    private val binding get() = _binding!!
+
     private val dataManager = SayurDataManager()
     private val nlpProcessor = NLPProcessor(dataManager)
     private val queryHistory = mutableListOf<Pair<String, String>>()
     private lateinit var historyAdapter: NLPHistoryAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityNlpBinding.inflate(layoutInflater)
-        enableEdgeToEdge()
-        setContentView(binding.root)
+    private val filePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    requireActivity().contentResolver.takePersistableUriPermission(uri, takeFlags)
+                    importExcelFile(uri)
+                }
+            }
+        }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentNlpBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         historyAdapter = NLPHistoryAdapter(queryHistory)
-        binding.rvHistory.layoutManager = LinearLayoutManager(this).apply {
+        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext()).apply {
             stackFromEnd = false
             reverseLayout = true
         }
@@ -61,56 +82,55 @@ class NLPActivity : AppCompatActivity() {
 
                 queryHistory.add(0, Pair(query, response))
                 historyAdapter.notifyItemInserted(0)
-
                 binding.rvHistory.scrollToPosition(0)
-
                 binding.etQuery.text.clear()
             }
         }
 
-        // Fix layout when keyboard visible
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom
-            view.setPadding(0, 0, 0, maxOf(imeHeight, navBarHeight))
-            val imeVisible = insets.isVisible(Type.ime())
-
-            binding.tvQueryLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-            binding.tvResponseLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-            binding.btnImportExcel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-
-            insets
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+//            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+//
+//            Log.d("NLPFragment", "Keyboard visible? $imeVisible")
+//
+//            binding.tvQueryLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+//            binding.tvResponseLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+//            binding.btnImportExcel.visibility = if (imeVisible) View.GONE else View.VISIBLE
+//
+//            insets
+//        }
+//        ViewCompat.requestApplyInsets(binding.root)
     }
 
     private fun checkPermissionsAndOpenFilePicker() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            openFilePicker()
-        } else if (ContextCompat.checkSelfPermission(
-                this,
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                requireContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
+            ) == PackageManager.PERMISSION_GRANTED
         ) {
+            openFilePicker()
+        } else {
             ActivityCompat.requestPermissions(
-                this,
+                requireActivity(),
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 PERMISSION_REQUEST_CODE
             )
-        } else {
-            openFilePicker()
         }
     }
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            setType("*/*")
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
-                "application/vnd.ms-excel",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            ))
+            type = "*/*"
+            putExtra(
+                Intent.EXTRA_MIME_TYPES,
+                arrayOf(
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            )
         }
-        startActivityForResult(intent, REQUEST_CODE_PICK_EXCEL)
+        filePickerLauncher.launch(intent)
     }
 
     override fun onRequestPermissionsResult(
@@ -119,29 +139,19 @@ class NLPActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                openFilePicker()
-            } else {
-                Toast.makeText(this, "Izin akses penyimpanan diperlukan untuk mengimpor file Excel", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_CODE_PICK_EXCEL && resultCode == RESULT_OK) {
-            data?.data?.let { uri ->
-                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                contentResolver.takePersistableUriPermission(uri, takeFlags)
-                importExcelFile(uri)
-            }
+        if (requestCode == PERMISSION_REQUEST_CODE &&
+            grantResults.isNotEmpty() &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
+            openFilePicker()
+        } else {
+            Toast.makeText(requireContext(), "mohon izin akses penyimoanan", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun importExcelFile(uri: Uri) {
         try {
-            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            val inputStream: InputStream? = requireActivity().contentResolver.openInputStream(uri)
             inputStream?.use { stream ->
                 val workbook = WorkbookFactory.create(stream)
                 val sheet = workbook.getSheetAt(0)
@@ -179,9 +189,7 @@ class NLPActivity : AppCompatActivity() {
                     }
 
                     if (id != null && vegetableType != null && weight != null && timestamp != null) {
-                        dataManager.addVegetableData(
-                            VegetableData(id, vegetableType, weight, timestamp)
-                        )
+                        dataManager.addVegetableData(VegetableData(id, vegetableType, weight, timestamp))
                     }
                 }
 
@@ -192,5 +200,14 @@ class NLPActivity : AppCompatActivity() {
             binding.tvResponse.text = "Error importing Excel file: ${e.message}"
             e.printStackTrace()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    companion object {
+        private const val PERMISSION_REQUEST_CODE = 102
     }
 }

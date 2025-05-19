@@ -23,26 +23,25 @@
         android:theme="@style/Theme.VeggieVision"
         tools:targetApi="31">
         <activity
-            android:name=".view.HistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.NLPActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:name=".view.HostActivity"
+            android:exported="false"
+            android:theme="@style/Theme.VeggieVision"
+            android:windowSoftInputMode="adjustPan" />
+
         <activity
             android:name=".view.ResultActivity"
             android:exported="false" />
+
         <activity
-            android:name=".view.CameraActivity"
-            android:exported="false" />
-        <activity android:name=".view.SplashActivity"
+            android:name=".view.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.MainActivity" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

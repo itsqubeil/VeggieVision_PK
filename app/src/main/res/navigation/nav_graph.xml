@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.veggievision.lokatani.view.MainFragment"
+        android:label="mainFragment"
+        tools:layout="@layout/fragment_main">
+    </fragment>
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.veggievision.lokatani.view.CameraFragment"
+        android:label="cameraFragment"
+        tools:layout="@layout/fragment_camera">
+    </fragment>
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.veggievision.lokatani.view.HistoryFragment"
+        android:label="historyFragment"
+        tools:layout="@layout/fragment_history">
+    </fragment>
+    <fragment
+        android:id="@+id/nlpFragment"
+        android:name="com.veggievision.lokatani.view.NLPFragment"
+        android:label="nlpFragment"
+        tools:layout="@layout/fragment_nlp">
+    </fragment>
+
+<!--    https://www.flaticon.com/free-icon/home_1946488-->
+<!--    https://www.flaticon.com/free-icon/camera_10944612-->
+<!--    https://www.flaticon.com/free-icon/history_2961948-->
+<!--    https://www.flaticon.com/free-icon/conversation_14434700-->
+
+</navigation>

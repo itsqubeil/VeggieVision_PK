@@ -8,9 +8,10 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -18,26 +19,27 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.gson.Gson
+import androidx.fragment.app.Fragment
 import com.google.gson.GsonBuilder
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
-import com.veggievision.lokatani.databinding.ActivityCameraBinding
+import com.veggievision.lokatani.databinding.FragmentCameraBinding
 import com.veggievision.lokatani.detection.BoundingBox
 import com.veggievision.lokatani.detection.Model.LABELS_PATH
 import com.veggievision.lokatani.detection.Model.MODEL_PATH
 import com.veggievision.lokatani.detection.ObjectDetectorHelper
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.io.File
 import java.io.FileOutputStream
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListener {
-    private lateinit var binding: ActivityCameraBinding
+class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
+    private var _binding: FragmentCameraBinding? = null
+    private val binding get() = _binding!!
+
     private val isFrontCamera = false
 
     private var preview: Preview? = null
@@ -53,6 +55,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     private var rawJsonResult: String? = null
 
     private lateinit var cameraExecutor: ExecutorService
+
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             if (permissions[Manifest.permission.CAMERA] == true) {
@@ -62,21 +65,21 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
             }
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityCameraBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCameraBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
-        detector = ObjectDetectorHelper(baseContext, MODEL_PATH, LABELS_PATH, this)
+        detector = ObjectDetectorHelper(requireContext(), MODEL_PATH, LABELS_PATH, this)
         detector.setup()
-
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
@@ -85,10 +88,16 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
         }
         binding.overlay.visibility = View.GONE
         binding.resetButton.visibility = View.GONE
+
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+        }
     }
 
     private fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
             capturedBitmap = null
             detectedBoundingBoxes = emptyList()
@@ -97,7 +106,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
             resetUI()
             cameraProvider = cameraProviderFuture.get()
             bindCameraUseCases()
-        }, ContextCompat.getMainExecutor(this))
+        }, ContextCompat.getMainExecutor(requireContext()))
     }
 
     private fun resetUI() {
@@ -113,8 +122,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
 
             val rotation = binding.viewFinder.display.rotation
 
-            val cameraSelector = CameraSelector
-                .Builder()
+            val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build()
 
@@ -124,20 +132,20 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
 
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setTargetRotation(binding.viewFinder.display.rotation)
+                .setTargetRotation(rotation)
                 .build()
 
             camera = cameraProvider.bindToLifecycle(
-                this,
+                viewLifecycleOwner,
                 cameraSelector,
                 preview,
                 imageCapture
             )
 
-            preview?.surfaceProvider = binding.viewFinder.surfaceProvider
+            preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
             binding.captureButton.isEnabled = true
 
-        } catch(exc: Exception) {
+        } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
             binding.captureButton.isEnabled = false
         }
@@ -154,7 +162,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
         binding.captureButton.isEnabled = false
 
         imageCapture.takePicture(
-            ContextCompat.getMainExecutor(this),
+            ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
                     val bitmap = imageProxyToBitmap(image)
@@ -186,9 +194,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
             }
         }
 
-        return Bitmap.createBitmap(
-            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
-        )
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     private fun processTextRecognition(bitmap: Bitmap, boundingBox: BoundingBox) {
@@ -232,7 +238,7 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
         val filename = "captured_image_${System.currentTimeMillis()}.png"
-        val file = File(cacheDir, filename)
+        val file = File(requireContext().cacheDir, filename)
 
         FileOutputStream(file).use { outputStream ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
@@ -300,12 +306,11 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
 
             rawJsonResult = createJsonResult()
 
-            val intent = Intent(this, ResultActivity::class.java).apply {
+            val intent = Intent(requireContext(), ResultActivity::class.java).apply {
                 putExtra("captured_image_uri", fileUri.toString())
                 putStringArrayListExtra("detected_classes", detectedClasses)
                 putExtra("confidence_values", confidenceValues)
                 putExtra("raw_json_result", rawJsonResult)
-
                 recognizedText?.let { text ->
                     putExtra("recognized_text", text)
                 }
@@ -318,55 +323,40 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     }
 
     private fun showLoading(isLoading: Boolean) {
-        if (isLoading) {
-            binding.loadingProgress.visibility = View.VISIBLE
-        } else {
-            binding.loadingProgress.visibility = View.GONE
-        }
+        binding.loadingProgress.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
     override fun onEmptyDetect() {
-        if (!isFinishing && !isDestroyed) {
-            runOnUiThread {
-                navigateToResultActivity()
-            }
+        activity?.runOnUiThread {
+            navigateToResultActivity()
         }
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, inferenceTime: Long) {
         detectedBoundingBoxes = boundingBoxes
 
-        if (!isFinishing && !isDestroyed) {
-            runOnUiThread {
-                Log.d(TAG, "Detection completed in ${inferenceTime}ms")
+        activity?.runOnUiThread {
+            Log.d(TAG, "Detection completed in ${inferenceTime}ms")
 
-                val beratBox = boundingBoxes.find { it.clsName.equals("berat", ignoreCase = true) }
+            val beratBox = boundingBoxes.find { it.clsName.equals("berat", ignoreCase = true) }
 
-                if (beratBox != null && capturedBitmap != null) {
-                    processTextRecognition(capturedBitmap!!, beratBox)
-                } else {
-                    navigateToResultActivity()
-                }
+            if (beratBox != null && capturedBitmap != null) {
+                processTextRecognition(capturedBitmap!!, beratBox)
+            } else {
+                navigateToResultActivity()
             }
         }
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
     }
 
-    companion object {
-        private const val TAG = "Camera"
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        private val REQUIRED_PERMISSIONS = mutableListOf (
-            Manifest.permission.CAMERA
-        ).toTypedArray()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         cameraExecutor.shutdown()
         detector.clear()
+        _binding = null
         Log.d(TAG, "kameraactivity meninggal")
     }
 
@@ -383,5 +373,10 @@ class CameraActivity : AppCompatActivity(), ObjectDetectorHelper.DetectorListene
     override fun onStop() {
         super.onStop()
         cameraProvider?.unbindAll()
+    }
+
+    companion object {
+        private const val TAG = "CameraFragment"
+        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 }

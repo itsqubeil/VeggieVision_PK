@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.veggievision.lokatani.R
-import com.veggievision.lokatani.databinding.ActivityHistoryBinding
 import com.veggievision.lokatani.databinding.ActivitySplashBinding
 
 class SplashActivity : AppCompatActivity() {
@@ -25,7 +24,7 @@ class SplashActivity : AppCompatActivity() {
             insets
         }
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, HostActivity::class.java))
             finish()
         }, 2000)
     }

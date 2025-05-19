@@ -1,44 +1,46 @@
 package com.veggievision.lokatani.view
 
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.veggievision.lokatani.R
 import com.veggievision.lokatani.data.VeggieDatabase
 import com.veggievision.lokatani.data.VeggieEntity
-import com.veggievision.lokatani.databinding.ActivityHistoryBinding
+import com.veggievision.lokatani.databinding.FragmentHistoryBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.*
 
-class HistoryActivity : AppCompatActivity() {
+class HistoryFragment : Fragment() {
 
-    private lateinit var binding: ActivityHistoryBinding
+    private var _binding: FragmentHistoryBinding? = null
+    private val binding get() = _binding!!
+
     private lateinit var adapter: HistoryAdapter
     private lateinit var database: VeggieDatabase
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityHistoryBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentHistoryBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        database = VeggieDatabase.getDatabase(this)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        database = VeggieDatabase.getDatabase(requireContext())
         adapter = HistoryAdapter()
 
-        binding.rvHistory.layoutManager = LinearLayoutManager(this)
+        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.rvHistory.adapter = adapter
 
         loadHistory()
@@ -66,7 +68,7 @@ class HistoryActivity : AppCompatActivity() {
         binding.buttonExport.setOnClickListener {
             val selectedItems = adapter.getSelectedItems()
             if (selectedItems.isEmpty()) {
-                Toast.makeText(this, "Tidak ada data yang dipilih", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Tidak ada data yang dipilih", Toast.LENGTH_SHORT).show()
             } else {
                 exportToExcel(selectedItems)
             }
@@ -92,10 +94,15 @@ class HistoryActivity : AppCompatActivity() {
         }
 
         val fileName = "data_sayuran.xlsx"
-        val file = File(getExternalFilesDir(null), fileName)
+        val file = File(requireContext().getExternalFilesDir(null), fileName)
         FileOutputStream(file).use { workbook.write(it) }
         workbook.close()
 
-        Toast.makeText(this, "File disimpan di: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), "File disimpan di: ${file.absolutePath}", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
