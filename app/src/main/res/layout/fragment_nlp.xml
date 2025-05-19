@@ -35,7 +35,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rounded_box"
                 android:paddingHorizontal="5dp"
@@ -46,7 +46,7 @@
                 android:id="@+id/btnImportExcel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/colorSecondary"
+                android:backgroundTint="@color/md_theme_secondary"
                 android:text="Import Excel File"
                 android:layout_marginTop="8dp" />
 
@@ -73,6 +73,46 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="20dp"
                 android:text="Tanya tentang sayuranmu:" />
+
+            <!-- Template buttons container -->
+            <LinearLayout
+                android:id="@+id/templateButtonsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/btnTemplate1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/md_theme_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2" />
+
+                <Button
+                    android:id="@+id/btnTemplate2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/md_theme_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2" />
+
+                <Button
+                    android:id="@+id/btnTemplate3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/md_theme_secondary"
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="2" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -104,11 +144,11 @@
             android:layout_height="40dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/ripple_rounded_button"
-            android:backgroundTint="@color/colorSecondary"
+            android:backgroundTint="@color/md_theme_secondary"
             android:padding="10dp"
             android:scaleType="centerInside"
             android:src="@drawable/ic_send"
-            app:tint="@color/ourWhite" />
+            app:tint="@color/md_theme_onPrimary" />
 
     </LinearLayout>
 

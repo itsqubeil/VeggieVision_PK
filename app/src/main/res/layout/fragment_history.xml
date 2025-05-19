@@ -22,8 +22,8 @@
             android:paddingTop="6dp"
             android:paddingBottom="6dp"
             android:drawableLeft="@drawable/ic_outline_check_box_24"
-            android:drawableTint="@color/ourWhite"
-            android:backgroundTint="@color/colorSecondary"
+            android:drawableTint="@color/md_theme_onSecondary"
+            android:backgroundTint="@color/md_theme_secondary"
             android:text="Pilih Semua" />
 
 
@@ -39,8 +39,8 @@
             android:paddingBottom="6dp"
             android:layout_marginStart="8dp"
             android:drawableLeft="@drawable/ic_outline_check_box_outline_blank_24"
-            android:drawableTint="@color/ourWhite"
-            android:backgroundTint="@color/colorSecondary"
+            android:drawableTint="@color/md_theme_onSecondary"
+            android:backgroundTint="@color/md_theme_secondary"
             android:text="Batal Pilih" />
 
         <Space
@@ -59,8 +59,8 @@
             android:paddingTop="6dp"
             android:paddingBottom="6dp"
             android:drawableLeft="@drawable/outline_docs_24"
-            android:drawableTint="@color/ourWhite"
-            android:backgroundTint="@color/colorSecondary"
+            android:drawableTint="@color/md_theme_onSecondary"
+            android:backgroundTint="@color/md_theme_secondary"
             android:text="Export" />
     </LinearLayout>
 

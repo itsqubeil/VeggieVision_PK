@@ -24,7 +24,6 @@ class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder
             binding.textTimestamp.text = item.timestamp
             binding.checkbox.isChecked = isSelected
 
-            // Saat item atau checkbox di-klik, toggle pilihan
             binding.root.setOnClickListener {
                 toggleSelection(item.id)
             }

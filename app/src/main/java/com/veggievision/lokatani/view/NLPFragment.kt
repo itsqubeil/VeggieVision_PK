@@ -15,12 +15,10 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.veggievision.lokatani.NLP.NLPProcessor
+import com.veggievision.lokatani.NLP.QuestionTemplateHelper
 import com.veggievision.lokatani.NLP.SayurDataManager
 import com.veggievision.lokatani.NLP.VegetableData
 import com.veggievision.lokatani.databinding.FragmentNlpBinding
@@ -39,6 +37,8 @@ class NLPFragment : Fragment() {
     private val nlpProcessor = NLPProcessor(dataManager)
     private val queryHistory = mutableListOf<Pair<String, String>>()
     private lateinit var historyAdapter: NLPHistoryAdapter
+
+    private val questionTemplateHelper = QuestionTemplateHelper()
 
     private val filePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -75,30 +75,49 @@ class NLPFragment : Fragment() {
         }
 
         binding.btnAsk.setOnClickListener {
-            val query = binding.etQuery.text.toString().trim()
-            if (query.isNotEmpty()) {
-                val response = nlpProcessor.processQuery(query)
-                binding.tvResponse.text = response
-
-                queryHistory.add(0, Pair(query, response))
-                historyAdapter.notifyItemInserted(0)
-                binding.rvHistory.scrollToPosition(0)
-                binding.etQuery.text.clear()
-            }
+            processUserQuery(binding.etQuery.text.toString().trim())
         }
 
-//        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-//            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-//
-//            Log.d("NLPFragment", "Keyboard visible? $imeVisible")
-//
-//            binding.tvQueryLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-//            binding.tvResponseLabel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-//            binding.btnImportExcel.visibility = if (imeVisible) View.GONE else View.VISIBLE
-//
-//            insets
-//        }
-//        ViewCompat.requestApplyInsets(binding.root)
+        setupTemplateButtons()
+    }
+
+    private fun setupTemplateButtons() {
+        refreshTemplateButtons()
+
+        binding.btnTemplate1.setOnClickListener {
+            processUserQuery(binding.btnTemplate1.text.toString())
+            refreshTemplateButtons()
+        }
+
+        binding.btnTemplate2.setOnClickListener {
+            processUserQuery(binding.btnTemplate2.text.toString())
+            refreshTemplateButtons()
+        }
+
+        binding.btnTemplate3.setOnClickListener {
+            processUserQuery(binding.btnTemplate3.text.toString())
+            refreshTemplateButtons()
+        }
+    }
+
+    private fun refreshTemplateButtons() {
+        val templates = questionTemplateHelper.getRandomTemplates(3)
+
+        if (templates.size >= 1) binding.btnTemplate1.text = templates[0]
+        if (templates.size >= 2) binding.btnTemplate2.text = templates[1]
+        if (templates.size >= 3) binding.btnTemplate3.text = templates[2]
+    }
+
+    private fun processUserQuery(query: String) {
+        if (query.isNotEmpty()) {
+            val response = nlpProcessor.processQuery(query)
+            binding.tvResponse.text = response
+
+            queryHistory.add(0, Pair(query, response))
+            historyAdapter.notifyItemInserted(0)
+            binding.rvHistory.scrollToPosition(0)
+            binding.etQuery.text.clear()
+        }
     }
 
     private fun checkPermissionsAndOpenFilePicker() {

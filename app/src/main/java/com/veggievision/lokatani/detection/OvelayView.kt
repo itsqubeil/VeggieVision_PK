@@ -45,7 +45,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         textPaint.style = Paint.Style.FILL
         textPaint.textSize = 50f
 
-        boxPaint.color = ContextCompat.getColor(context!!, R.color.black)
+        boxPaint.color = ContextCompat.getColor(context!!, R.color.md_theme_onSurface)
         boxPaint.strokeWidth = 8F
         boxPaint.style = Paint.Style.STROKE
     }

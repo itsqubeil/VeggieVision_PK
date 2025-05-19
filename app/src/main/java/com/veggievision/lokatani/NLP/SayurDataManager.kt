@@ -52,6 +52,25 @@ class SayurDataManager {
             it.timestamp >= startOfDay && it.timestamp < startOfNextDay
         }
     }
+    fun getCurrentWeekRange(): Pair<Date, Date> {
+        val calendar = Calendar.getInstance()
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val start = calendar.time
+
+        // Tambah 6 hari ke depan untuk dapatkan akhir minggu
+        calendar.add(Calendar.DAY_OF_WEEK, 6)
+        calendar.set(Calendar.HOUR_OF_DAY, 23)
+        calendar.set(Calendar.MINUTE, 59)
+        calendar.set(Calendar.SECOND, 59)
+        val end = calendar.time
+
+        return Pair(start, end)
+    }
 
     fun getDataForCurrentWeek(): List<VegetableData> {
         val calendar = Calendar.getInstance()

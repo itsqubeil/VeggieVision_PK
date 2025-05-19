@@ -52,7 +52,7 @@
         android:layout_height="65dp"
         android:layout_margin="20dp"
 
-        app:backgroundTint="@color/colorSecondary"
+        app:backgroundTint="@color/md_theme_secondary"
         app:borderWidth="2dp"
         app:fabCustomSize="65dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,7 +61,7 @@
         app:layout_constraintTop_toBottomOf="@+id/view_finder"
         app:maxImageSize="35dp"
         app:srcCompat="@drawable/ic_baseline_camera_48"
-        app:tint="@color/ourWhite"
+        app:tint="@color/md_theme_onSecondary"
         android:contentDescription="Button Capture" />
 
 <!--    <ImageButton-->
@@ -82,7 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
-        android:textColor="@color/white"
+        android:textColor="@color/md_theme_onPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="100ms" />
@@ -92,7 +92,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
-        android:backgroundTint="@color/colorSecondary"
+        android:backgroundTint="@color/md_theme_secondary"
         android:text="Coba Lagi"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -107,8 +107,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        android:progressTint="@color/colorSecondary"
-        android:indeterminateTint="@color/colorSecondary"
+        android:progressTint="@color/md_theme_secondary"
+        android:indeterminateTint="@color/md_theme_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

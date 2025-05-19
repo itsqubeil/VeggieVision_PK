@@ -49,8 +49,10 @@ class ResultActivity : AppCompatActivity() {
                 binding.editTextClassName.setText(className)
             }
         }
+        val weighter = recognizedText?.replace(Regex("[^0-9]"), "")
+        binding.editTextRecognizedText.setText(weighter ?: "")
 
-        binding.editTextRecognizedText.setText(recognizedText ?: "")
+//        binding.editTextRecognizedText.setText(recognizedText ?: "")
 
         if (detectedClasses.isNotEmpty() && confidenceValues.isNotEmpty()) {
             val confidencePercent = String.format("%.2f", confidenceValues[0] * 100)

@@ -1,6 +1,7 @@
 package com.veggievision.lokatani.view
 
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,9 @@ import kotlinx.coroutines.withContext
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HistoryFragment : Fragment() {
 
@@ -76,29 +80,59 @@ class HistoryFragment : Fragment() {
     }
 
     private fun exportToExcel(data: List<VeggieEntity>) {
-        val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("Data Sayuran")
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val workbook = XSSFWorkbook()
+                val sheet = workbook.createSheet("Data Sayuran")
 
-        val header = sheet.createRow(0)
-        header.createCell(0).setCellValue("ID")
-        header.createCell(1).setCellValue("Jenis Sayur")
-        header.createCell(2).setCellValue("Berat")
-        header.createCell(3).setCellValue("Timestamp")
+                val header = sheet.createRow(0)
+                header.createCell(0).setCellValue("ID")
+                header.createCell(1).setCellValue("Jenis Sayur")
+                header.createCell(2).setCellValue("Berat")
+                header.createCell(3).setCellValue("Timestamp")
 
-        data.forEachIndexed { index, item ->
-            val row = sheet.createRow(index + 1)
-            row.createCell(0).setCellValue(index + 1.toDouble())
-            row.createCell(1).setCellValue(item.name)
-            row.createCell(2).setCellValue(item.weight.toDouble())
-            row.createCell(3).setCellValue(item.timestamp)
+                data.forEachIndexed { index, item ->
+                    val row = sheet.createRow(index + 1)
+                    row.createCell(0).setCellValue(index + 1.toDouble())
+                    row.createCell(1).setCellValue(item.name)
+                    row.createCell(2).setCellValue(item.weight.toDouble())
+                    row.createCell(3).setCellValue(item.timestamp)
+                }
+
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+                val fileName = "VeggieVision_Exported_Data_$timeStamp.xlsx"
+
+                val downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                val veggieVisionDir = File(downloadDir, "veggievision")
+
+                if (!veggieVisionDir.exists()) {
+                    veggieVisionDir.mkdirs()
+                }
+
+                val file = File(veggieVisionDir, fileName)
+                FileOutputStream(file).use {
+                    workbook.write(it)
+                }
+                workbook.close()
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        requireContext(),
+                        "File disimpan di: ${file.absolutePath}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Gagal menyimpan file: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                e.printStackTrace()
+            }
         }
-
-        val fileName = "data_sayuran.xlsx"
-        val file = File(requireContext().getExternalFilesDir(null), fileName)
-        FileOutputStream(file).use { workbook.write(it) }
-        workbook.close()
-
-        Toast.makeText(requireContext(), "File disimpan di: ${file.absolutePath}", Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
