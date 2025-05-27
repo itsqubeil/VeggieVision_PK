@@ -2,4 +2,3 @@ bayam
 berat
 kangkung
 pakcoy
-tomatcherry

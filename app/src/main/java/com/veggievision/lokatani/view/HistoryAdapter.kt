@@ -14,6 +14,7 @@ import java.util.*
 class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder>(DIFF_CALLBACK) {
 
     private val selectedItemIds = mutableSetOf<Int>()
+    var onSelectionChanged: ((Int) -> Unit)? = null
 
     inner class VeggieViewHolder(private val binding: ItemHistoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -52,16 +53,19 @@ class HistoryAdapter : ListAdapter<VeggieEntity, HistoryAdapter.VeggieViewHolder
             selectedItemIds.add(id)
         }
         notifyDataSetChanged()
+        onSelectionChanged?.invoke(selectedItemIds.size)
     }
 
     fun clearSelection() {
         selectedItemIds.clear()
         notifyDataSetChanged()
+        onSelectionChanged?.invoke(selectedItemIds.size)
     }
 
     fun selectAll() {
         currentList.forEach { selectedItemIds.add(it.id) }
         notifyDataSetChanged()
+        onSelectionChanged?.invoke(selectedItemIds.size)
     }
 
     fun getSelectedItems(): List<VeggieEntity> {

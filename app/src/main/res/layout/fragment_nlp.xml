@@ -35,20 +35,20 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvHistory"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="250dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rounded_box"
                 android:paddingHorizontal="5dp"
                 android:paddingTop="10dp"
                 android:paddingBottom="5dp" />
 
-            <Button
-                android:id="@+id/btnImportExcel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/md_theme_secondary"
-                android:text="Import Excel File"
-                android:layout_marginTop="8dp" />
+<!--            <Button-->
+<!--                android:id="@+id/btnImportExcel"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:backgroundTint="@color/md_theme_secondary"-->
+<!--                android:text="Import Excel File"-->
+<!--                android:layout_marginTop="8dp" />-->
 
             <TextView
                 android:id="@+id/tvResponseLabel"
@@ -138,6 +138,12 @@
             android:layout_weight="1"
             android:hint="Berapa berat bayam hari ini?" />
 
+        <ImageView
+            android:id="@+id/btnImportExcel"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_import" />
+
         <ImageButton
             android:id="@+id/btnAsk"
             android:layout_width="40dp"
@@ -150,6 +156,7 @@
             android:src="@drawable/ic_send"
             app:tint="@color/md_theme_onPrimary" />
 
+<!--        https://icons8.com/icon/86407/attach-->
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

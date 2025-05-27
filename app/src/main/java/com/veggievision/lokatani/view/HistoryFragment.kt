@@ -44,6 +44,22 @@ class HistoryFragment : Fragment() {
         database = VeggieDatabase.getDatabase(requireContext())
         adapter = HistoryAdapter()
 
+//        adapter.onSelectionChanged = { selectedCount ->
+//            if (selectedCount > 0) {
+//                binding.buttonSelectAll.visibility = View.GONE
+//                binding.buttonClearSelection.visibility = View.VISIBLE
+//            } else {
+//                binding.buttonSelectAll.visibility = View.VISIBLE
+//                binding.buttonClearSelection.visibility = View.GONE
+//            }
+//        }
+
+        adapter.onSelectionChanged = { selectedCount ->
+            val hasSelection = selectedCount > 0
+            binding.buttonSelectAll.fadeToVisibility(!hasSelection)
+            binding.buttonClearSelection.fadeToVisibility(hasSelection)
+        }
+
         binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.rvHistory.adapter = adapter
 
@@ -77,6 +93,19 @@ class HistoryFragment : Fragment() {
                 exportToExcel(selectedItems)
             }
         }
+
+        binding.buttonDeleteSelected.setOnClickListener {
+            val selectedItems = adapter.getSelectedItems()
+
+            if (selectedItems.isEmpty()) {
+                Toast.makeText(requireContext(), "Tidak ada data yang dipilih", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Confirm before deleting (optional)
+            deleteSelectedItems(selectedItems)
+        }
+
     }
 
     private fun exportToExcel(data: List<VeggieEntity>) {
@@ -135,8 +164,38 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    private fun deleteSelectedItems(items: List<VeggieEntity>) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                database.veggieDao().deleteItems(items)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Data berhasil dihapus", Toast.LENGTH_SHORT).show()
+                    adapter.clearSelection()
+                    loadHistory()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Gagal menghapus: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+}
+
+private fun View.fadeToVisibility(visible: Boolean, duration: Long = 200) {
+    animate()
+        .alpha(if (visible) 1f else 0f)
+        .setDuration(duration)
+        .withStartAction {
+            if (visible) this.visibility = View.VISIBLE
+        }
+        .withEndAction {
+            if (!visible) this.visibility = View.GONE
+        }
 }

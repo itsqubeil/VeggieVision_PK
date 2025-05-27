@@ -47,4 +47,43 @@
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
     </style>
+
+    <style name="ShapeAppearance.Material3.Corner.Circle" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/md_theme_primaryContainer</item>
+
+        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Circle</item>
+
+        <item name="android:insetLeft">40dp</item>
+        <item name="android:insetRight">40dp</item>
+        <item name="android:insetTop">16dp</item>
+        <item name="android:insetBottom">16dp</item>
+
+        <item name="android:paddingHorizontal">0dp</item>
+        <item name="android:paddingVertical">0dp</item>
+    </style>
+
+<!--    <style name="BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">-->
+<!--        <item name="android:color">@color/md_theme_primaryContainer</item>-->
+
+<!--        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Circle</item>-->
+
+<!--        <item name="android:insetBottom">12dp</item>-->
+<!--        <item name="android:insetTop">12dp</item>-->
+<!--        <item name="android:insetLeft">18dp</item>-->
+<!--        <item name="android:insetRight">18dp</item>-->
+
+<!--        <item name="android:paddingHorizontal">0dp</item>-->
+<!--        <item name="android:paddingVertical">0dp</item>-->
+<!--    </style>-->
+
+<!--    <style name="ShapeAppearance.Material3.Corner.Circle" parent="">-->
+<!--        <item name="cornerFamily">rounded</item>-->
+<!--        <item name="cornerSize">50%</item>-->
+<!--    </style>-->
+
 </resources>

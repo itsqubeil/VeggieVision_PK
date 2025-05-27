@@ -1,6 +1,6 @@
 package com.veggievision.lokatani.detection
 
 object Model {
-    const val MODEL_PATH = "veggie_n_version.tflite"
+    const val MODEL_PATH = "v11_n.tflite"
     const val LABELS_PATH = "labels.txt"
 }
