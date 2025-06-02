@@ -26,6 +26,7 @@ class ResultActivity : AppCompatActivity() {
     private var confidenceValues = floatArrayOf()
     private var recognizedText: String? = null
     private var imageUri: Uri? = null
+    private var imageFileToDelete: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +41,9 @@ class ResultActivity : AppCompatActivity() {
         capturedImageUri?.let {
             val uri = Uri.parse(it)
             imageUri = uri
+            uri.path?.let { path ->
+                imageFileToDelete = File(path)
+            }
             val bitmap = getBitmapFromUri(uri)
             binding.imageView.setImageBitmap(bitmap)
         }
@@ -96,13 +100,29 @@ class ResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun getBitmapFromUri(uri: Uri): Bitmap {
-        val file = File(uri.path!!)
-        return BitmapFactory.decodeStream(FileInputStream(file))
-    }
-
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return sdf.format(Date())
+    }
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap {
+        // Jika imageFileToDelete sudah diinisialisasi, gunakan itu
+        val fileToLoad = imageFileToDelete ?: File(uri.path!!)
+        return BitmapFactory.decodeStream(FileInputStream(fileToLoad))
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Hapus file dari cache saat activity dihancurkan
+        imageFileToDelete?.let { file ->
+            if (file.exists()) {
+                if (file.delete()) {
+                    android.util.Log.d("ResultActivity", "Cache file deleted: ${file.absolutePath}")
+                } else {
+                    android.util.Log.e("ResultActivity", "Failed to delete cache file: ${file.absolutePath}")
+                }
+            }
+        }
     }
 }
