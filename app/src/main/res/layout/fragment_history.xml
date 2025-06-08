@@ -66,13 +66,31 @@
             android:paddingTop="6dp"
             android:paddingEnd="8dp"
             android:paddingBottom="6dp"
-            android:text="Delete"
+            android:text="Hapus"
             android:textColor="@color/md_theme_error"
             app:cornerRadius="5dp"
             app:strokeColor="@color/md_theme_error"
             app:strokeWidth="2dp" />
     </LinearLayout>
 
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:hint="Pilih Kategori Sayur"
+        android:textColorHint="@color/md_theme_primary_mediumContrast"
+        app:boxStrokeColor="@color/md_theme_primary_mediumContrast">
+
+        <AutoCompleteTextView
+            android:id="@+id/autoCompleteTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:textSize="14sp" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvHistory"

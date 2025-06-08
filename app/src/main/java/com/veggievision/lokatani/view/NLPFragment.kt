@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +21,7 @@ import com.veggievision.lokatani.NLP.QuestionTemplateHelper
 import com.veggievision.lokatani.NLP.SayurDataManager
 import com.veggievision.lokatani.NLP.VegetableData
 import com.veggievision.lokatani.databinding.FragmentNlpBinding
+import com.xwray.groupie.GroupieAdapter
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import java.io.InputStream
@@ -35,10 +35,9 @@ class NLPFragment : Fragment() {
 
     private val dataManager = SayurDataManager()
     private val nlpProcessor = NLPProcessor(dataManager)
-    private val queryHistory = mutableListOf<Pair<String, String>>()
-    private lateinit var historyAdapter: NLPHistoryAdapter
-
     private val questionTemplateHelper = QuestionTemplateHelper()
+
+    private val groupieAdapter = GroupieAdapter()
 
     private val filePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -63,12 +62,8 @@ class NLPFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        historyAdapter = NLPHistoryAdapter(queryHistory)
-        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext()).apply {
-            stackFromEnd = false
-            reverseLayout = true
-        }
-        binding.rvHistory.adapter = historyAdapter
+        binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvHistory.adapter = groupieAdapter
 
         binding.btnImportExcel.setOnClickListener {
             checkPermissionsAndOpenFilePicker()
@@ -110,12 +105,20 @@ class NLPFragment : Fragment() {
 
     private fun processUserQuery(query: String) {
         if (query.isNotEmpty()) {
-            val response = nlpProcessor.processQuery(query)
-            binding.tvResponse.text = response
+            // Add user message to the adapter
+            groupieAdapter.add(UserMessageItem(query))
+            // Scroll to the bottom to see the new message
+            binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
 
-            queryHistory.add(0, Pair(query, response))
-            historyAdapter.notifyItemInserted(0)
-            binding.rvHistory.scrollToPosition(0)
+
+            // Process query and get the response
+            val response = nlpProcessor.processQuery(query)
+
+            // Add bot response to the adapter
+            groupieAdapter.add(BotMessageItem(response))
+            // Scroll to the bottom again to see the response
+            binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
+
             binding.etQuery.text.clear()
         }
     }
@@ -212,11 +215,17 @@ class NLPFragment : Fragment() {
                     }
                 }
 
-                binding.tvResponse.text = "Excel data imported successfully. ${dataManager.getVegetableData().size} entries loaded."
+                // Give feedback in the chat UI
+                val successMessage = "Excel data imported successfully. ${dataManager.getVegetableData().size} entries loaded."
+                groupieAdapter.add(BotMessageItem(successMessage))
+                binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
+
                 workbook.close()
             }
         } catch (e: Exception) {
-            binding.tvResponse.text = "Error importing Excel file: ${e.message}"
+            val errorMessage = "Error importing Excel file: ${e.message}"
+            groupieAdapter.add(BotMessageItem(errorMessage))
+            binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
             e.printStackTrace()
         }
     }

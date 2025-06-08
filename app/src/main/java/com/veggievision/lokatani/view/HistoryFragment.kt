@@ -21,6 +21,9 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.widget.ArrayAdapter
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.veggievision.lokatani.R
 
 class HistoryFragment : Fragment() {
 
@@ -29,6 +32,8 @@ class HistoryFragment : Fragment() {
 
     private lateinit var adapter: HistoryAdapter
     private lateinit var database: VeggieDatabase
+
+    private var history: List<VeggieEntity> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,16 +48,6 @@ class HistoryFragment : Fragment() {
 
         database = VeggieDatabase.getDatabase(requireContext())
         adapter = HistoryAdapter()
-
-//        adapter.onSelectionChanged = { selectedCount ->
-//            if (selectedCount > 0) {
-//                binding.buttonSelectAll.visibility = View.GONE
-//                binding.buttonClearSelection.visibility = View.VISIBLE
-//            } else {
-//                binding.buttonSelectAll.visibility = View.VISIBLE
-//                binding.buttonClearSelection.visibility = View.GONE
-//            }
-//        }
 
         adapter.onSelectionChanged = { selectedCount ->
             val hasSelection = selectedCount > 0
@@ -69,10 +64,35 @@ class HistoryFragment : Fragment() {
 
     private fun loadHistory() {
         lifecycleScope.launch {
-            val history = withContext(Dispatchers.IO) {
+            history = withContext(Dispatchers.IO) {
                 database.veggieDao().getAll()
             }
             adapter.submitList(history)
+            setupCategoryFilter()
+        }
+    }
+
+    private fun setupCategoryFilter() {
+        val categories = history.map { it.name }.distinct().sorted()
+
+        val filterOptions = mutableListOf("Semua Kategori")
+        filterOptions.addAll(categories)
+
+        val filterAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, filterOptions)
+        binding.autoCompleteTextView.setAdapter(filterAdapter)
+
+        binding.autoCompleteTextView.setOnItemClickListener { parent, view, position, id ->
+            val selectedCategory = parent.getItemAtPosition(position) as String
+
+            // Filter selection
+            val filteredList = if (selectedCategory == "Semua Kategori") {
+                history // show all
+            } else {
+                history.filter { it.name == selectedCategory } // show filtered
+            }
+
+            adapter.submitList(filteredList)
+//            adapter.clearSelection() //clear selected
         }
     }
 
@@ -103,7 +123,7 @@ class HistoryFragment : Fragment() {
             }
 
             // Confirm before deleting (optional)
-            deleteSelectedItems(selectedItems)
+            deleteSelectedItemsDialog(selectedItems)
         }
 
     }
@@ -181,6 +201,19 @@ class HistoryFragment : Fragment() {
         }
     }
 
+    private fun deleteSelectedItemsDialog(itemsToDelete: List<VeggieEntity>) {
+        MaterialAlertDialogBuilder(requireContext(), R.style.MyAlertDialogStyle)
+            .setTitle("Konfirmasi Hapus")
+            .setMessage("Anda yakin ingin menghapus ${itemsToDelete.size} data yang dipilih?")
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setPositiveButton("Hapus") { dialog, _ ->
+                deleteSelectedItems(itemsToDelete)
+                dialog.dismiss()
+            }
+            .show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()

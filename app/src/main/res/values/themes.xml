@@ -53,6 +53,7 @@
         <item name="cornerSize">50%</item>
     </style>
 
+<!--    Bottom Nav-->
     <style name="BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">@color/md_theme_primaryContainer</item>
 
@@ -67,23 +68,30 @@
         <item name="android:paddingVertical">0dp</item>
     </style>
 
-<!--    <style name="BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">-->
-<!--        <item name="android:color">@color/md_theme_primaryContainer</item>-->
+<!--    Alert Dialog Delete-->
+    <style name="MyAlertDialogStyle" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <item name="colorSurface">@color/md_theme_surface</item>
+        <item name="colorOnSurface">@color/md_theme_onSurface</item>
 
-<!--        <item name="shapeAppearance">@style/ShapeAppearance.Material3.Corner.Circle</item>-->
+        <item name="buttonBarPositiveButtonStyle">@style/MyDialogPositiveButtonTextStyle</item>
 
-<!--        <item name="android:insetBottom">12dp</item>-->
-<!--        <item name="android:insetTop">12dp</item>-->
-<!--        <item name="android:insetLeft">18dp</item>-->
-<!--        <item name="android:insetRight">18dp</item>-->
+        <item name="materialAlertDialogTitleTextStyle">@style/MyDialogTitleTextStyle</item>
 
-<!--        <item name="android:paddingHorizontal">0dp</item>-->
-<!--        <item name="android:paddingVertical">0dp</item>-->
-<!--    </style>-->
+        <item name="shapeAppearanceOverlay">@style/MyDialogCornerStyle</item>
+    </style>
 
-<!--    <style name="ShapeAppearance.Material3.Corner.Circle" parent="">-->
-<!--        <item name="cornerFamily">rounded</item>-->
-<!--        <item name="cornerSize">50%</item>-->
-<!--    </style>-->
+    <style name="MyDialogTitleTextStyle" parent="MaterialAlertDialog.Material3.Title.Text">
+        <item name="android:textColor">@color/md_theme_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MyDialogPositiveButtonTextStyle" parent="Widget.Material3.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/md_theme_error</item>
+    </style>
+
+    <style name="MyDialogCornerStyle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">15dp</item>
+    </style>
 
 </resources>

@@ -69,4 +69,7 @@ dependencies {
     implementation (libs.text.recognition)
     implementation (libs.gson)
     implementation (libs.mpandroidchart)
+
+    implementation(libs.groupie)
+    implementation(libs.groupie.viewbinding)
 }

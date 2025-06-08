@@ -81,15 +81,29 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+
         android:ems="10"
         android:hint="berat"
-        android:inputType="text"
+        android:inputType="numberSigned"
         android:padding="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
+
+        app:layout_constraintEnd_toStartOf="@+id/tv_gram"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewRecognizedTextLabel" />
 
+
+    <TextView
+        android:id="@+id/tv_gram"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:padding="12dp"
+        android:text="gram"
+
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewRecognizedTextLabel" />
 
     <Button
         android:id="@+id/buttonSave"
