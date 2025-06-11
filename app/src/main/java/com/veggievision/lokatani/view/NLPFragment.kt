@@ -50,6 +50,8 @@ class NLPFragment : Fragment() {
             }
         }
 
+    private var isDataLoaded = false //To check import status
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -104,6 +106,11 @@ class NLPFragment : Fragment() {
     }
 
     private fun processUserQuery(query: String) {
+        if (!isDataLoaded) {
+            Toast.makeText(requireContext(), "Silakan impor file Excel terlebih dahulu", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         if (query.isNotEmpty()) {
             // Add user message to the adapter
             groupieAdapter.add(UserMessageItem(query))
@@ -214,6 +221,8 @@ class NLPFragment : Fragment() {
                         dataManager.addVegetableData(VegetableData(id, vegetableType, weight, timestamp))
                     }
                 }
+
+                isDataLoaded = true
 
                 // Give feedback in the chat UI
                 val successMessage = "Excel data imported successfully. ${dataManager.getVegetableData().size} entries loaded."
