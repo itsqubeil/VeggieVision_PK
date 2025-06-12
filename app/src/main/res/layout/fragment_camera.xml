@@ -11,6 +11,21 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ProgressBar
+            android:id="@+id/pb_capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:indeterminateTint="@color/md_theme_secondary"
+            android:progressTint="@color/md_theme_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.965" />
+
         <androidx.camera.view.PreviewView
             android:id="@+id/view_finder"
             android:layout_width="0dp"
@@ -22,7 +37,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.5"
-            app:scaleType="fillStart" />
+            app:scaleType="fillStart">
+
+        </androidx.camera.view.PreviewView>
 
         <ImageView
             android:id="@+id/captured_image_view"
@@ -66,6 +83,7 @@
             app:maxImageSize="35dp"
             app:srcCompat="@drawable/ic_baseline_camera_48"
             app:tint="@color/md_theme_onSecondary" />
+
 
         <TextView
             android:id="@+id/inferenceTime"

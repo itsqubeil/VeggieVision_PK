@@ -26,6 +26,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.veggievision.lokatani.R
 import com.veggievision.lokatani.databinding.FragmentCameraBinding
 import com.veggievision.lokatani.detection.BoundingBox
 import com.veggievision.lokatani.detection.Model.LABELS_PATH
@@ -53,6 +54,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     private var detectedBoundingBoxes: List<BoundingBox> = emptyList()
     private var recognizedText: String? = null
     private var rawJsonResult: String? = null
+    private var isCameraFrozen = false
 
     private lateinit var cameraExecutor: ExecutorService
 
@@ -84,11 +86,15 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         binding.captureButton.setOnClickListener {
-            captureImage()
+            if (isCameraFrozen) {
+                restartCamera()
+            } else {
+                captureImage()
+            }
         }
-        binding.overlay.visibility = View.GONE
-        binding.resetButton.visibility = View.GONE
 
+
+        binding.overlay.visibility = View.GONE
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -103,14 +109,41 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             detectedBoundingBoxes = emptyList()
             recognizedText = null
             rawJsonResult = null
+            isCameraFrozen = false
             resetUI()
             cameraProvider = cameraProviderFuture.get()
             bindCameraUseCases()
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
+    private fun restartCamera() {
+        capturedBitmap = null
+        detectedBoundingBoxes = emptyList()
+        recognizedText = null
+        rawJsonResult = null
+        isCameraFrozen = false
+
+        binding.capturedImageView.visibility = View.GONE
+        binding.captureButton.setImageResource(R.drawable.ic_baseline_camera_48)
+
+        startCamera()
+    }
+
+    private fun freezeCamera() {
+        cameraProvider?.unbindAll()
+        isCameraFrozen = true
+
+        capturedBitmap?.let { bitmap ->
+            binding.capturedImageView.setImageBitmap(bitmap)
+            binding.capturedImageView.visibility = View.VISIBLE
+        }
+
+        binding.captureButton.visibility = View.VISIBLE
+    }
+
     private fun resetUI() {
-        binding.captureButton.isEnabled = true
+        binding.captureButton.visibility = View.VISIBLE
+        binding.captureButton.setImageResource(R.drawable.ic_baseline_camera_48)
         showLoading(false)
     }
 
@@ -143,7 +176,7 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
             )
 
             preview?.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-            binding.captureButton.isEnabled = true
+            binding.captureButton.visibility = View.VISIBLE
 
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
@@ -153,32 +186,50 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private fun captureImage() {
         val imageCapture = imageCapture ?: return
-
-        capturedBitmap = null
-        detectedBoundingBoxes = emptyList()
-        recognizedText = null
-        rawJsonResult = null
-        showLoading(true)
-        binding.captureButton.isEnabled = false
+        binding.captureButton.visibility = View.GONE
+        binding.pbCapture.visibility = View.VISIBLE
 
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    val bitmap = imageProxyToBitmap(image)
-                    capturedBitmap = bitmap
-                    detector.detect(bitmap)
-                    image.close()
+                    cameraExecutor.execute {
+                        try {
+                            val bitmap = imageProxyToBitmap(image)
+                            capturedBitmap = bitmap
+                            image.close()
+
+                            activity?.runOnUiThread {
+                                freezeCamera()
+                                showLoading(true)
+                                binding.pbCapture.visibility = View.GONE
+                            }
+
+                            detector.detect(bitmap)
+
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error converting image: ${e.message}")
+                            image.close()
+                            activity?.runOnUiThread {
+                                showLoading(false)
+                                binding.captureButton.visibility = View.VISIBLE
+                                binding.pbCapture.visibility = View.GONE
+                            }
+                        }
+                    }
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Log.e(TAG, "gagal poto ${exception.message}", exception)
+                    Log.e(TAG, "Gagal capture: ${exception.message}")
                     showLoading(false)
-                    binding.captureButton.isEnabled = true
+                    binding.captureButton.visibility = View.VISIBLE
+                    binding.pbCapture.visibility = View.GONE
                 }
             }
         )
+
     }
+
 
     private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
         val buffer = imageProxy.planes[0].buffer
@@ -198,54 +249,68 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
     }
 
     private fun processTextRecognition(bitmap: Bitmap, boundingBox: BoundingBox) {
-        val imgWidth = bitmap.width
-        val imgHeight = bitmap.height
+        cameraExecutor.execute {
+            try {
+                val imgWidth = bitmap.width
+                val imgHeight = bitmap.height
 
-        val x1 = (boundingBox.x1 * imgWidth).toInt().coerceIn(0, imgWidth)
-        val y1 = (boundingBox.y1 * imgHeight).toInt().coerceIn(0, imgHeight)
-        val x2 = (boundingBox.x2 * imgWidth).toInt().coerceIn(0, imgWidth)
-        val y2 = (boundingBox.y2 * imgHeight).toInt().coerceIn(0, imgHeight)
+                val x1 = (boundingBox.x1 * imgWidth).toInt().coerceIn(0, imgWidth)
+                val y1 = (boundingBox.y1 * imgHeight).toInt().coerceIn(0, imgHeight)
+                val x2 = (boundingBox.x2 * imgWidth).toInt().coerceIn(0, imgWidth)
+                val y2 = (boundingBox.y2 * imgHeight).toInt().coerceIn(0, imgHeight)
 
-        if (x2 <= x1 || y2 <= y1) {
-            Log.e(TAG, "Invalid bounding box dimensions")
-            navigateToResultActivity()
-            return
-        }
+                if (x2 <= x1 || y2 <= y1) {
+                    Log.e(TAG, "Invalid bounding box dimensions")
+                    activity?.runOnUiThread {
+                        navigateToResultActivity()
+                    }
+                    return@execute
+                }
 
-        val width = x2 - x1
-        val height = y2 - y1
+                val width = x2 - x1
+                val height = y2 - y1
 
-        try {
-            val croppedBitmap = Bitmap.createBitmap(bitmap, x1, y1, width, height)
+                val croppedBitmap = Bitmap.createBitmap(bitmap, x1, y1, width, height)
+                val inputImage = InputImage.fromBitmap(croppedBitmap, 0)
 
-            val inputImage = InputImage.fromBitmap(croppedBitmap, 0)
-
-            textRecognizer.process(inputImage)
-                .addOnSuccessListener { visionText ->
-                    recognizedText = visionText.text
-                    Log.d(TAG, "isi teks : $recognizedText")
+                textRecognizer.process(inputImage)
+                    .addOnSuccessListener { visionText ->
+                        activity?.runOnUiThread {
+                            recognizedText = visionText.text
+                            Log.d(TAG, "isi teks : $recognizedText")
+                            navigateToResultActivity()
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "gagal baca teks ${e.message}")
+                        activity?.runOnUiThread {
+                            navigateToResultActivity()
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.e(TAG, "eror baca teks ${e.message}")
+                activity?.runOnUiThread {
                     navigateToResultActivity()
                 }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, "gagal baca teks ${e.message}")
-                    navigateToResultActivity()
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "eror baca teks ${e.message}")
-            navigateToResultActivity()
+            }
         }
     }
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
-        val filename = "captured_image_${System.currentTimeMillis()}.png"
-        val file = File(requireContext().cacheDir, filename)
+        return try {
+            val filename = "captured_image_${System.currentTimeMillis()}.png"
+            val file = File(requireContext().cacheDir, filename)
 
-        FileOutputStream(file).use { outputStream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-            outputStream.flush()
+            FileOutputStream(file).use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+            }
+
+            Uri.fromFile(file)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving bitmap: ${e.message}")
+            Uri.EMPTY
         }
-
-        return Uri.fromFile(file)
     }
 
     private fun createJsonResult(): String {
@@ -293,31 +358,47 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private fun navigateToResultActivity() {
         capturedBitmap?.let { bitmap ->
-            val fileUri = saveBitmapToFile(bitmap)
+            cameraExecutor.execute {
+                try {
+                    val fileUri = saveBitmapToFile(bitmap)
+                    val detectedClasses = ArrayList<String>()
+                    val confidenceValues = FloatArray(detectedBoundingBoxes.size)
 
-            val detectedClasses = ArrayList<String>()
-            val confidenceValues = FloatArray(detectedBoundingBoxes.size)
+                    for (i in detectedBoundingBoxes.indices) {
+                        val box = detectedBoundingBoxes[i]
+                        detectedClasses.add(box.clsName)
+                        confidenceValues[i] = box.cnf
+                    }
 
-            for (i in detectedBoundingBoxes.indices) {
-                val box = detectedBoundingBoxes[i]
-                detectedClasses.add(box.clsName)
-                confidenceValues[i] = box.cnf
-            }
+                    val jsonResult = createJsonResult()
 
-            rawJsonResult = createJsonResult()
+                    activity?.runOnUiThread {
+                        try {
+                            val intent = Intent(requireContext(), ResultActivity::class.java).apply {
+                                putExtra("captured_image_uri", fileUri.toString())
+                                putStringArrayListExtra("detected_classes", detectedClasses)
+                                putExtra("confidence_values", confidenceValues)
+                                putExtra("raw_json_result", jsonResult)
+                                recognizedText?.let { text ->
+                                    putExtra("recognized_text", text)
+                                }
+                            }
 
-            val intent = Intent(requireContext(), ResultActivity::class.java).apply {
-                putExtra("captured_image_uri", fileUri.toString())
-                putStringArrayListExtra("detected_classes", detectedClasses)
-                putExtra("confidence_values", confidenceValues)
-                putExtra("raw_json_result", rawJsonResult)
-                recognizedText?.let { text ->
-                    putExtra("recognized_text", text)
+                            startActivity(intent)
+                            showLoading(false)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error starting ResultActivity: ${e.message}")
+                            showLoading(false)
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error in navigateToResultActivity: ${e.message}")
+                    activity?.runOnUiThread {
+                        showLoading(false)
+                    }
                 }
             }
-
-            startActivity(intent)
-
+        } ?: run {
             showLoading(false)
         }
     }
@@ -366,7 +447,11 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
         } else {
-            startCamera()
+            if (isCameraFrozen) {
+                restartCamera()
+            } else {
+                startCamera()
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.9.0"
+androidxEspressoContrib = "3.5.1"
 cameraxVersion = "1.4.2"
 coreSplashscreen = "1.0.1"
 groupie = "2.10.1"
@@ -16,22 +17,30 @@ constraintlayout = "2.1.4"
 mpandroidchart = "v3.1.0"
 poi = "5.2.3"
 roomRuntime = "2.7.1"
+rules = "1.5.0"
+runner = "1.5.2"
 tensorflowLite = "2.14.0"
 tensorflowLiteMetadata = "0.4.4"
 tensorflowLiteSupport = "0.4.4"
 textRecognition = "16.0.1"
 navigationFragmentKtx = "2.6.0"
 navigationUiKtx = "2.6.0"
+uiautomatorVersion = "2.3.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraxVersion" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraxVersion" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "cameraxVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-espresso-intents = { module = "androidx.test.espresso:espresso-intents", version.ref = "androidxEspressoContrib" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-rules = { module = "androidx.test:rules", version.ref = "rules" }
+androidx-runner = { module = "androidx.test:runner", version.ref = "runner" }
+androidx-test-espresso-espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "androidxEspressoContrib" }
+androidx-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomatorVersion" }
 groupie = { module = "com.github.lisawray.groupie:groupie", version.ref = "groupie" }
 groupie-viewbinding = { module = "com.github.lisawray.groupie:groupie-viewbinding", version.ref = "groupie" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
