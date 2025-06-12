@@ -298,11 +298,11 @@ class CameraFragment : Fragment(), ObjectDetectorHelper.DetectorListener {
 
     private fun saveBitmapToFile(bitmap: Bitmap): Uri {
         return try {
-            val filename = "captured_image_${System.currentTimeMillis()}.png"
+            val filename = "captured_image_${System.currentTimeMillis()}.jpeg"
             val file = File(requireContext().cacheDir, filename)
 
             FileOutputStream(file).use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 outputStream.flush()
             }
 
