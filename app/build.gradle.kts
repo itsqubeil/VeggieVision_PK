@@ -72,4 +72,5 @@ dependencies {
 
     implementation(libs.groupie)
     implementation(libs.groupie.viewbinding)
+    implementation(libs.androidx.core.splashscreen)
 }

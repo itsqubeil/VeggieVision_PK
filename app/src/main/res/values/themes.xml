@@ -94,4 +94,12 @@
         <item name="cornerSize">15dp</item>
     </style>
 
+<!--    Splash Screen-->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@drawable/vv_bg</item>
+
+        <item name="windowSplashScreenAnimatedIcon">@drawable/vv_icon</item>
+
+        <item name="postSplashScreenTheme">@style/Theme.VeggieVision</item>
+    </style>
 </resources>

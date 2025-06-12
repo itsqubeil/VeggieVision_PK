@@ -67,6 +67,11 @@ class NLPFragment : Fragment() {
         binding.rvHistory.layoutManager = LinearLayoutManager(requireContext())
         binding.rvHistory.adapter = groupieAdapter
 
+        if (!isDataLoaded) {
+            val initialMessage = "Impor file excel terlebih dahulu sebelum memulai percakapan \uD83D\uDCCE"
+            groupieAdapter.add(BotMessageItem(initialMessage))
+        }
+
         binding.btnImportExcel.setOnClickListener {
             checkPermissionsAndOpenFilePicker()
         }
@@ -107,7 +112,9 @@ class NLPFragment : Fragment() {
 
     private fun processUserQuery(query: String) {
         if (!isDataLoaded) {
-            Toast.makeText(requireContext(), "Silakan impor file Excel terlebih dahulu", Toast.LENGTH_SHORT).show()
+            val warningMessage = "Impor file excel terlebih dahulu sebelum memulai percakapan \uD83D\uDCCE"
+            groupieAdapter.add(BotMessageItem(warningMessage))
+            binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
             return
         }
 
@@ -225,7 +232,7 @@ class NLPFragment : Fragment() {
                 isDataLoaded = true
 
                 // Give feedback in the chat UI
-                val successMessage = "Excel data imported successfully. ${dataManager.getVegetableData().size} entries loaded."
+                val successMessage = "Impor data Excel berhasil. ${dataManager.getVegetableData().size} entri dimuat."
                 groupieAdapter.add(BotMessageItem(successMessage))
                 binding.rvHistory.scrollToPosition(groupieAdapter.itemCount - 1)
 

@@ -18,6 +18,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import android.widget.ArrayAdapter
 
 class ResultActivity : AppCompatActivity() {
 
@@ -32,6 +33,10 @@ class ResultActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityResultBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val vegetableOptions = arrayOf("bayam", "kangkung", "pakcoy")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, vegetableOptions)
+        binding.autoCompleteTextViewClassName.setAdapter(adapter)
 
         val capturedImageUri = intent.getStringExtra("captured_image_uri")
         detectedClasses = intent.getStringArrayListExtra("detected_classes") ?: arrayListOf()
@@ -50,18 +55,28 @@ class ResultActivity : AppCompatActivity() {
         if (detectedClasses.isNotEmpty()) {
             val className = detectedClasses[0]
             if (className != "berat") {
-                binding.editTextClassName.setText(className)
+                binding.autoCompleteTextViewClassName.setText(className)
             }
         }
         val weighter = recognizedText?.replace(Regex("[^0-9]"), "")
-        binding.editTextRecognizedText.setText(weighter ?: "")
+//        binding.editTextRecognizedText.setText(weighter ?: "")
+        val weighterCleaned = if (!weighter.isNullOrEmpty()) {
+            try {
+                weighter.toLong().toString()
+            } catch (e: NumberFormatException) {
+                weighter
+            }
+        } else {
+            ""
+        }
+        binding.editTextRecognizedText.setText(weighterCleaned)
 
 //        binding.editTextRecognizedText.setText(recognizedText ?: "")
 
         if (detectedClasses.isNotEmpty() && confidenceValues.isNotEmpty()) {
             val confidencePercent = String.format("%.2f", confidenceValues[0] * 100)
             binding.textViewConfidence.text = "Confidence: $confidencePercent%"
-            binding.textViewConfidence.visibility = View.VISIBLE
+//            binding.textViewConfidence.visibility = View.VISIBLE
         } else {
             binding.textViewConfidence.visibility = View.GONE
         }
@@ -76,7 +91,7 @@ class ResultActivity : AppCompatActivity() {
     }
 
     private fun saveToDatabase() {
-        val veggieName = binding.editTextClassName.text.toString().trim()
+        val veggieName = binding.autoCompleteTextViewClassName.text.toString().trim()
         val veggieWeight = binding.editTextRecognizedText.text.toString().trim()
         val timestamp = getCurrentDateTime()
 

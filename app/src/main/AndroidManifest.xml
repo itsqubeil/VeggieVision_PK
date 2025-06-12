@@ -25,16 +25,19 @@
         <activity
             android:name=".view.HostActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.VeggieVision"
             android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".view.ResultActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".view.SplashActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

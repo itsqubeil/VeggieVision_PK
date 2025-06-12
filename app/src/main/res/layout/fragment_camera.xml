@@ -1,117 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/camera_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.CameraFragment">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/camera_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <androidx.camera.view.PreviewView
+            android:id="@+id/view_finder"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="3:4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5"
+            app:scaleType="fillStart" />
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/view_finder"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="3:4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5"
-        app:scaleType="fillStart" />
+        <ImageView
+            android:id="@+id/captured_image_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:contentDescription="Captured image preview"
+            android:scaleType="fitCenter"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/view_finder"
+            app:layout_constraintEnd_toEndOf="@+id/view_finder"
+            app:layout_constraintStart_toStartOf="@+id/view_finder"
+            app:layout_constraintTop_toTopOf="@+id/view_finder"
+            tools:visibility="visible" />
 
-    <com.veggievision.lokatani.detection.OverlayView
-        android:id="@+id/overlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:translationZ="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="3:4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.5" />
+        <com.veggievision.lokatani.detection.OverlayView
+            android:id="@+id/overlay"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:translationZ="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="3:4"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.5" />
 
-<!--    <Button-->
-<!--        android:id="@+id/captureButton"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="20dp"-->
-<!--        android:layout_marginStart="293dp"-->
-<!--        android:text="Capture"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent" />-->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/captureButton"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_margin="20dp"
+            android:contentDescription="Button Capture"
+            app:backgroundTint="@color/md_theme_secondary"
+            app:borderWidth="2dp"
+            app:fabCustomSize="65dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_finder"
+            app:maxImageSize="35dp"
+            app:srcCompat="@drawable/ic_baseline_camera_48"
+            app:tint="@color/md_theme_onSecondary" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/captureButton"
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_margin="20dp"
+        <TextView
+            android:id="@+id/inferenceTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:textColor="@color/md_theme_onPrimary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="100ms" />
 
-        app:backgroundTint="@color/md_theme_secondary"
-        app:borderWidth="2dp"
-        app:fabCustomSize="65dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/view_finder"
-        app:maxImageSize="35dp"
-        app:srcCompat="@drawable/ic_baseline_camera_48"
-        app:tint="@color/md_theme_onSecondary"
-        android:contentDescription="Button Capture" />
+        <Button
+            android:id="@+id/resetButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:backgroundTint="@color/md_theme_secondary"
+            android:text="Coba Lagi"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.88" />
 
-<!--    <ImageButton-->
-<!--        android:id="@+id/captureButton"-->
-<!--        android:layout_width="65dp"-->
-<!--        android:layout_height="65dp"-->
-<!--        android:layout_margin="20dp"-->
-<!--        android:background="@drawable/circle_background"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/view_finder"-->
-<!--        app:srcCompat="@drawable/ic_baseline_camera_48"-->
-<!--        app:tint="@color/ourWhite" />-->
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/inferenceTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="32dp"
-        android:textColor="@color/md_theme_onPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="100ms" />
-
-    <Button
-        android:id="@+id/resetButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:backgroundTint="@color/md_theme_secondary"
-        android:text="Coba Lagi"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.88" />
-
-
-    <ProgressBar
+    <FrameLayout
         android:id="@+id/loadingProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/md_theme_transparent_dark"
+        android:clickable="true"
+        android:focusable="true"
         android:visibility="gone"
-        android:progressTint="@color/md_theme_secondary"
-        android:indeterminateTint="@color/md_theme_secondary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:visibility="visible">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/md_theme_secondary"
+            android:progressTint="@color/md_theme_secondary" />
+    </FrameLayout>
+
+</FrameLayout>
